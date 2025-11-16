@@ -18,6 +18,8 @@ typedef std::vector<size_t> Shape;
 class Tensor
 {
 public:
+
+    Tensor() = default;
     Tensor(Shape shape, DType dtype, IBackend* backend);
     ~Tensor();
 
@@ -26,6 +28,10 @@ public:
 
     void toDevice(const void* hostPtr);
     void toHost(void* hostPtr);
+
+    size_t size() const;
+    size_t numel() const;
+    void* data() const;
 
 private:
     Shape       shape;

@@ -1,5 +1,7 @@
-#ifndef CUDANET_ACTIVATION_H
-#define CUDANET_ACTIVATION_H
+#pragma once
+
+#include "backend/tensor.hpp"
+#include "backend/backend.hpp"
 
 namespace CUDANet::Layers {
 
@@ -41,29 +43,16 @@ class Activation {
      * 
      * @param d_input Pointer to the input vector on the device
      */
-    void activate(float* d_input);
+    void activate(CUDANet::Backend::Tensor input);
 
 
   private:
+    CUDANet::Backend::IBackend* backend;
     ActivationType activationType;
     int length;
 
-    void activateCPU(float* input);
-
-#ifdef USE_CUDA
-    int gridSize;
-
-    float* d_softmax_sum;
-    float* d_max;
-
-    void activateCUDA(float* d_input);
-
-    void initCUDA();
-    void delCUDA();
-#endif
+    CUDANet::Backend::Tensor softmax_sum;
+    CUDANet::Backend::Tensor tensor_max;
 };
 
-
 }  // namespace CUDANet::Layers
-
-#endif  // CUDANET_ACTIVATION_H
