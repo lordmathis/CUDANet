@@ -30,7 +30,7 @@ class Activation {
      * @param activation Type of activation
      * @param length     Length of the input
      */
-    Activation(ActivationType activation, const int length);
+    Activation(CUDANet::Backend::IBackend* backend, ActivationType activation, const int length);
 
     /**
      * @brief Destroy the Activation object
