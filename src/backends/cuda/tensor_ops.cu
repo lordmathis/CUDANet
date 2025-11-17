@@ -43,7 +43,6 @@ void CUDABackend::sum(const CUDANet::Backend::Tensor &input, CUDANet::Backend::T
 
         remaining = blocks_needed;
     }
-
 }
 
 void CUDABackend::max(const CUDANet::Backend::Tensor &input, CUDANet::Backend::Tensor &max) {

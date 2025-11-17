@@ -1,37 +1,44 @@
-#include <stdexcept>
-
 #include "backend/tensor.hpp"
+
+#include <stdexcept>
 
 using namespace CUDANet::Backend;
 
 Tensor::Tensor(Shape shape, DType dtype, IBackend* backend)
-    : shape(shape), dtype(dtype), backend(backend), d_ptr(nullptr) {}
-
-Tensor::~Tensor() {
-    deallocate();
-}
-
-size_t Tensor::numel() const {
-    size_t totalElements = 1;
+    : shape(shape), dtype(dtype), backend(backend), d_ptr(nullptr) {
+    // Count total elements
+    size_t count = 1;
     for (const auto& dim : shape) {
-        totalElements *= dim;
+        count *= dim;
     }
-    return totalElements;
-}
+    total_elms = count;
 
-size_t Tensor::size() const {
-    size_t totalSize = numel();
-
-    size_t typeSize = 0;
+    // Compute total size (bytes)
+    size_t type_size = 0;
     switch (dtype) {
         case DType::FLOAT32:
-            typeSize = 4;
+            type_size = 4;
             break;
         default:
             throw std::runtime_error("Unsupported data type");
     }
+    total_size = total_elms * type_size;
 
-    return totalSize * typeSize;
+    // Allocate memory on backend
+    d_ptr = backend->allocate(total_size);
+}
+
+Tensor::~Tensor() {
+    backend->deallocate(d_ptr);
+    d_ptr = nullptr;
+}
+
+size_t Tensor::numel() const {
+    return total_elms;
+}
+
+size_t Tensor::size() const {
+    return total_size;
 }
 
 template <typename T>

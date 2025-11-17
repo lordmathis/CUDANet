@@ -23,9 +23,6 @@ public:
     Tensor(Shape shape, DType dtype, IBackend* backend);
     ~Tensor();
 
-    void* allocate();
-    void deallocate();
-
     size_t size() const;
     size_t numel() const;
 
@@ -38,6 +35,10 @@ public:
 private:
     Shape       shape;
     DType       dtype;
+
+    size_t total_elms;
+    size_t total_size;
+
     IBackend*   backend;
     void*       d_ptr;
 };

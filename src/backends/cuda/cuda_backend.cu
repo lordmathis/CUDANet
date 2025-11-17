@@ -1,60 +1,39 @@
-#include "backend/cuda_backend.cuh"
-#include "utils/cuda_helper.cuh"
-#include "kernels/activation_functions.cuh"
-#include "kernels/matmul.cuh"
-#include "utils/vector.cuh"
+#include <cuda_runtime.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <cuda_helper.cuh>
+
+#include "backend/cuda.cuh"
+
+cudaDeviceProp initializeCUDA() {
+    int deviceCount;
+    CUDA_CHECK(cudaGetDeviceCount(&deviceCount));
+
+    if (deviceCount == 0) {
+        std::fprintf(stderr, "No CUDA devices found. Exiting.\n");
+        std::exit(EXIT_FAILURE);
+    }
+
+    int device = 0;
+    CUDA_CHECK(cudaSetDevice(device));
+
+    cudaDeviceProp deviceProp;
+    CUDA_CHECK(cudaGetDeviceProperties(&deviceProp, device));
+
+    std::printf("Using CUDA device %d: %s\n", device, deviceProp.name);
+
+    return deviceProp;
+}
 
 using namespace CUDANet::Backend;
 
-void *CUDABackend::allocate(size_t bytes) {
-    void* devicePtr = nullptr;
-    CUDA_CHECK(cudaMalloc(&devicePtr, bytes));
-    return devicePtr;
+void* CUDABackend::allocate(size_t bytes) {
+    void* d_ptr = nullptr;
+    CUDA_CHECK(cudaMalloc(&d_ptr, bytes));
+    return d_ptr;
 }
 
 void CUDABackend::deallocate(void* ptr) {
     CUDA_CHECK(cudaFree(ptr));
-}
-
-
-void CUDABackend::relu(Tensor &tensor) {
-    int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    Kernels::relu<<<gridSize, BLOCK_SIZE>>>((float*)tensor.data(), (float*)tensor.data(), tensor.numel());
-    CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
-}
-
-void CUDABackend::sigmoid(Tensor &tensor) {
-    int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    Kernels::sigmoid<<<gridSize, BLOCK_SIZE>>>((float*)tensor.data(), (float*)tensor.data(), tensor.numel());
-    CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
-}
-
-void CUDABackend::softmax(Tensor &tensor, Tensor &temp_max, Tensor &temp_sum) {
-    int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
-
-    // Find max value
-    Utils::max(tensor, temp_max, tensor.numel());
-
-    // Subtract max value to improve numerical stability
-    Kernels::vec_scalar_sub<<<gridSize, BLOCK_SIZE>>>(
-        (float*)tensor.data(), (float*)tensor.data(), (float*)temp_max.data(), tensor.numel()
-    );
-    CUDA_CHECK(cudaGetLastError());
-
-    // Compute exponentials
-    Kernels::vec_exp<<<gridSize, BLOCK_SIZE>>>(
-        (float*)tensor.data(), (float*)tensor.data(), tensor.numel()
-    );
-    CUDA_CHECK(cudaGetLastError());
-    
-    // Find sum
-    Utils::sum(tensor, temp_sum, tensor.numel());
-
-    Kernels::vec_scalar_div<<<gridSize, BLOCK_SIZE>>>(
-        (float*)tensor.data(), (float*)tensor.data(), (float*)temp_sum.data(), tensor.numel()
-    );
-    CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
 }
