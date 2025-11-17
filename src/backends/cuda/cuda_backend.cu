@@ -16,15 +16,6 @@ void CUDABackend::deallocate(void* ptr) {
     CUDA_CHECK(cudaFree(ptr));
 }
 
-// void CUDABackend::copyToDevice(void* devicePtr, const void* hostPtr, size_t bytes) {
-//     CUDA_CHECK(cudaMemcpy(devicePtr, hostPtr, bytes, cudaMemcpyHostToDevice));
-//     CUDA_CHECK(cudaDeviceSynchronize());
-// }
-
-// void CUDABackend::copyToHost(void* hostPtr, const void* devicePtr, size_t bytes) {
-//     CUDA_CHECK(cudaMemcpy(hostPtr, devicePtr, bytes, cudaMemcpyDeviceToHost));
-//     CUDA_CHECK(cudaDeviceSynchronize());
-// }
 
 void CUDABackend::relu(Tensor &tensor) {
     int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;

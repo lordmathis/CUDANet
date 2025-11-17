@@ -1,0 +1,65 @@
+#include <iostream>
+
+#include "backend/backend.hpp"
+#include "backend/cuda.cuh"
+#include "utils/cuda_helper.cuh"
+#include "kernels/matmul.cuh"
+
+using namespace CUDANet::Backend;
+
+void CUDABackend::print(const CUDANet::Backend::Tensor &input) {
+    auto length = input.numel();
+    std::vector<float> h_vec(input.numel());
+
+    CUDA_CHECK(cudaMemcpy(
+        h_vec.data(), input.data<float>(), sizeof(float) * length, cudaMemcpyDeviceToHost
+    ));
+
+    for (int i = 0; i < length; ++i) {
+        std::cout << h_vec[i] << ", ";
+    }
+
+    std::cout << std::endl;
+}
+
+void CUDABackend::clear(CUDANet::Backend::Tensor &input) {
+    CUDA_CHECK(cudaMemset(input.data<float>(), 0, sizeof(float) * input.numel()));
+}
+
+void CUDABackend::sum(const CUDANet::Backend::Tensor &input, CUDANet::Backend::Tensor &sum) {
+    auto length = input.numel();
+    const int gridSize = ( + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    CUDANet::Kernels::sum_reduce<<<gridSize, BLOCK_SIZE>>>(
+        input.data<float>(), sum.data<float>(), length
+    );
+    CUDA_CHECK(cudaGetLastError());
+
+    int remaining = gridSize;
+    while (remaining > 1) {
+        int blocks_needed = (remaining + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        CUDANet::Kernels::sum_reduce<<<blocks_needed, BLOCK_SIZE>>>(sum.data<float>(), sum.data<float>(), remaining);
+        CUDA_CHECK(cudaGetLastError());
+
+        remaining = blocks_needed;
+    }
+
+}
+
+void CUDABackend::max(const CUDANet::Backend::Tensor &input, CUDANet::Backend::Tensor &max) {
+    auto length = input.numel();
+    const int grid_size = (length + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    Kernels::max_reduce<<<grid_size, BLOCK_SIZE>>>(input.data<float>(), max.data<float>(), length);
+    CUDA_CHECK(cudaGetLastError());
+
+    int remaining = grid_size;
+
+    while (remaining > 1) {
+        int blocks_needed = (remaining + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        CUDANet::Kernels::max_reduce<<<blocks_needed, BLOCK_SIZE>>>(max.data<float>(), max.data<float>(), remaining);
+        CUDA_CHECK(cudaGetLastError());
+
+        remaining = blocks_needed;
+    }
+}

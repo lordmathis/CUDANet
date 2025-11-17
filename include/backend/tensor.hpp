@@ -26,19 +26,20 @@ public:
     void* allocate();
     void deallocate();
 
-    void toDevice(const void* hostPtr);
-    void toHost(void* hostPtr);
-
     size_t size() const;
     size_t numel() const;
-    void* data() const;
+
+    template <typename T>
+    const T* data() const;
+
+    template <typename T>
+    T* data();
 
 private:
     Shape       shape;
     DType       dtype;
     IBackend*   backend;
-    void*       devicePtr;
-    void*       hostPtr;
+    void*       d_ptr;
 };
 
 } // namespace CUDANet::Backend

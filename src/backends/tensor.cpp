@@ -5,7 +5,7 @@
 using namespace CUDANet::Backend;
 
 Tensor::Tensor(Shape shape, DType dtype, IBackend* backend)
-    : shape(shape), dtype(dtype), backend(backend), devicePtr(nullptr), hostPtr(nullptr) {}
+    : shape(shape), dtype(dtype), backend(backend), d_ptr(nullptr) {}
 
 Tensor::~Tensor() {
     deallocate();
@@ -34,6 +34,12 @@ size_t Tensor::size() const {
     return totalSize * typeSize;
 }
 
-void* Tensor::data() const {
-    return devicePtr;
+template <typename T>
+const T* Tensor::data() const {
+    return static_cast<T*>(d_ptr);
+}
+
+template <typename T>
+T* Tensor::data() {
+    return static_cast<T*>(d_ptr);
 }
