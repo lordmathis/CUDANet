@@ -1,9 +1,12 @@
 #pragma once
+
 #include <cstddef>
-#include "backend/backend.hpp"
 #include <vector>
 
-namespace CUDANet::Backend
+#include "backend.hpp"
+#include "shape.hpp"
+
+namespace CUDANet
 {
 
 enum class DType
@@ -13,14 +16,12 @@ enum class DType
     // INT32,  // Not implemented yet
 };
 
-typedef std::vector<size_t> Shape;
-
 class Tensor
 {
 public:
 
     Tensor() = default;
-    Tensor(Shape shape, DType dtype, IBackend* backend);
+    Tensor(Shape shape, DType dtype, CUDANet::Backend::IBackend* backend);
     ~Tensor();
 
     size_t size() const;
@@ -39,8 +40,8 @@ private:
     size_t total_elms;
     size_t total_size;
 
-    IBackend*   backend;
+    CUDANet::Backend::IBackend*   backend;
     void*       d_ptr;
 };
 
-} // namespace CUDANet::Backend
+} // namespace CUDANet

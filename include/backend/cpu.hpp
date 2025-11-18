@@ -5,7 +5,7 @@
 
 namespace CUDANet::Backend {
 
-class CUDA : public Backend {
+class CPU : public Backend {
 public:
     // Memory management
     void* allocate(size_t bytes) override;
@@ -23,4 +23,4 @@ public:
     void softmax(CUDANet::Tensor &tensor, CUDANet::Tensor &temp_max, CUDANet::Tensor &temp_sum) override;
 };
 
-}  // namespace CUDANet::Backend
+}

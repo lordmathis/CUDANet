@@ -5,21 +5,21 @@
 
 using namespace CUDANet::Backend;
 
-void CUDABackend::relu(Tensor &tensor) {
+void CUDA::relu(Tensor &tensor) {
     int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
     Kernels::relu<<<gridSize, BLOCK_SIZE>>>(tensor.data<float>(), tensor.data<float>(), tensor.numel());
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
 }
 
-void CUDABackend::sigmoid(Tensor &tensor) {
+void CUDA::sigmoid(Tensor &tensor) {
     int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
     Kernels::sigmoid<<<gridSize, BLOCK_SIZE>>>(tensor.data<float>(), tensor.data<float>(), tensor.numel());
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
 }
 
-void CUDABackend::softmax(Tensor &tensor, Tensor &temp_max, Tensor &temp_sum) {
+void CUDA::softmax(Tensor &tensor, Tensor &temp_max, Tensor &temp_sum) {
     int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     // Find max value

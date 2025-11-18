@@ -6,7 +6,7 @@
 
 namespace CUDANet::Layers {
 
-class AvgPooling2d : public SequentialLayer, public TwoDLayer {
+class AvgPooling2d : public Layer, public TwoDLayer {
   public:
     AvgPooling2d(
         shape2d        inputSize,
@@ -25,7 +25,7 @@ class AvgPooling2d : public SequentialLayer, public TwoDLayer {
      *
      * @return int output size
      */
-    int getOutputSize();
+    int get_output_size();
 
     /**
      * @brief Get input size

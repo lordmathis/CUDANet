@@ -213,7 +213,7 @@ InceptionB::InceptionB(
         branch3x3->getOutputSize(), branch3x3dbl_3->getOutputSize()
     );
     concat_2 = new CUDANet::Layers::Concat(
-        concat_1->getOutputSize(), branchPool->getOutputSize()
+        concat_1->getOutputSize(), branchPool->get_output_size()
     );
 
     outputSize = concat_2->getOutputSize();
@@ -441,7 +441,7 @@ InceptionD::InceptionD(
         branch3x3_2->getOutputSize(), branch7x7x3_4->getOutputSize()
     );
     concat_2 = new CUDANet::Layers::Concat(
-        concat_1->getOutputSize(), branchPool->getOutputSize()
+        concat_1->getOutputSize(), branchPool->get_output_size()
     );
 
     outputSize = concat_2->getOutputSize();
@@ -707,7 +707,7 @@ InceptionV3::InceptionV3(
     addLayer("AveragePool", avgpool);
 
     fc = new CUDANet::Layers::Dense(
-        avgpool->getOutputSize(), 1000, CUDANet::Layers::ActivationType::NONE
+        avgpool->get_output_size(), 1000, CUDANet::Layers::ActivationType::NONE
     );
     addLayer("fc", fc);
 }

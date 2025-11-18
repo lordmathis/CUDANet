@@ -9,7 +9,7 @@ namespace CUDANet::Layers {
  * @brief Input layer, just copies the input to the device
  *
  */
-class Input : public SequentialLayer {
+class Input : public Layer {
   public:
     /**
      * @brief Create a new Input layer
@@ -38,7 +38,7 @@ class Input : public SequentialLayer {
      *
      * @return int output size
      */
-    int getOutputSize();
+    int get_output_size();
 
     /**
      * @brief Get input size

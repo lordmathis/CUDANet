@@ -54,7 +54,7 @@ class AvgPoolingLayerTest : public ::testing::Test {
 
         d_output = avgPoolingLayer->forward(d_input);
 
-        int outputSize = avgPoolingLayer->getOutputSize();
+        int outputSize = avgPoolingLayer->get_output_size();
 
         std::vector<float> output(outputSize);
         cudaStatus = cudaMemcpy(
@@ -229,7 +229,7 @@ class AdaptiveAvgPoolingLayerTest : public ::testing::Test {
 
         d_output = adaptiveAvgPoolingLayer->forward(d_input);
 
-        int outputSize = adaptiveAvgPoolingLayer->getOutputSize();
+        int outputSize = adaptiveAvgPoolingLayer->get_output_size();
 
         std::vector<float> output(outputSize);
         cudaStatus = cudaMemcpy(

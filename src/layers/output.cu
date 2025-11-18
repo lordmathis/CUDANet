@@ -24,7 +24,7 @@ float* Output::forward(const float* input) {
 #endif
 }
 
-int Output::getOutputSize() {
+int Output::get_output_size() {
     return inputSize;
 }
 

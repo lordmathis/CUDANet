@@ -6,7 +6,7 @@
 
 namespace CUDANet::Layers {
 
-class MaxPooling2d : public SequentialLayer, public TwoDLayer {
+class MaxPooling2d : public Layer, public TwoDLayer {
   public:
     MaxPooling2d(
         shape2d        inputSize,
@@ -25,7 +25,7 @@ class MaxPooling2d : public SequentialLayer, public TwoDLayer {
      *
      * @return int output size
      */
-    int getOutputSize();
+    int get_output_size();
 
     /**
      * @brief Get input size

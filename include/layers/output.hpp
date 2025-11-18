@@ -5,7 +5,7 @@
 
 namespace CUDANet::Layers {
 
-class Output : public SequentialLayer {
+class Output : public Layer {
   public:
     /**
      * @brief Create a new Output layer
@@ -34,7 +34,7 @@ class Output : public SequentialLayer {
      *
      * @return int output size
      */
-    int getOutputSize();
+    int get_output_size();
 
     /**
      * @brief Get input size

@@ -52,7 +52,7 @@ class MaxPoolingLayerTest : public ::testing::Test {
 
         d_output = maxPoolingLayer->forward(d_input);
 
-        int outputSize = maxPoolingLayer->getOutputSize();
+        int outputSize = maxPoolingLayer->get_output_size();
 
         std::vector<float> output(outputSize);
         cudaStatus = cudaMemcpy(

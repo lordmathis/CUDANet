@@ -28,12 +28,12 @@ cudaDeviceProp initializeCUDA() {
 
 using namespace CUDANet::Backend;
 
-void* CUDABackend::allocate(size_t bytes) {
+void* CUDA::allocate(size_t bytes) {
     void* d_ptr = nullptr;
     CUDA_CHECK(cudaMalloc(&d_ptr, bytes));
     return d_ptr;
 }
 
-void CUDABackend::deallocate(void* ptr) {
+void CUDA::deallocate(void* ptr) {
     CUDA_CHECK(cudaFree(ptr));
 }
