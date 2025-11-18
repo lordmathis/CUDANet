@@ -29,12 +29,12 @@ class CUDA : public Backend {
     ) override;
 
     CUDANet::Tensor& dense(
-        CUDANet::Tensor& weights,
-        CUDANet::Tensor& biases,
-        CUDANet::Tensor& input,
+        const CUDANet::Tensor& weights,
+        const CUDANet::Tensor& biases,
+        const CUDANet::Tensor& input,
         CUDANet::Tensor& output,
-        size_t           input_size,
-        size_t           output_size
+        const size_t           input_size,
+        const size_t           output_size
     ) override;
 };
 

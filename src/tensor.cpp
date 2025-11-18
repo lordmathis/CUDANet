@@ -6,6 +6,11 @@ using namespace CUDANet;
 
 Tensor::Tensor(Shape shape, DType dtype, Backend* backend)
     : shape(shape), dtype(dtype), backend(backend), d_ptr(nullptr) {
+
+    if (shape.empty()) {
+        throw std::runtime_error("Tensor shape cannot be empty");
+    }
+    
     // Count total elements
     size_t count = 1;
     for (const auto& dim : shape) {
@@ -26,6 +31,40 @@ Tensor::Tensor(Shape shape, DType dtype, Backend* backend)
 
     // Allocate memory on backend
     d_ptr = backend->allocate(total_size);
+}
+
+Tensor::Tensor(Tensor&& other) noexcept
+    : shape(std::move(other.shape)),
+      dtype(other.dtype),
+      total_elms(other.total_elms),
+      total_size(other.total_size),
+      backend(other.backend),
+      d_ptr(other.d_ptr)
+{
+    other.d_ptr = nullptr;
+    other.backend = nullptr;
+}
+
+Tensor& Tensor::operator=(Tensor&& other) noexcept {
+    if (this != &other) {
+        // Clean up our current resources
+        if (d_ptr != nullptr && backend != nullptr) {
+            backend->deallocate(d_ptr);
+        }
+        
+        // Steal other's resources
+        shape = std::move(other.shape);
+        dtype = other.dtype;
+        total_elms = other.total_elms;
+        total_size = other.total_size;
+        backend = other.backend;
+        d_ptr = other.d_ptr;
+        
+        // Leave other in valid but empty state
+        other.d_ptr = nullptr;
+        other.backend = nullptr;
+    }
+    return *this;
 }
 
 Tensor::~Tensor() {
@@ -57,5 +96,5 @@ void Tensor::zero() {
 
 template <typename T>
 void Tensor::set_data(T *data) {
-    backend->copy_to_device(*this, data, total_size)
+    backend->copy_to_device(*this, data, total_size);
 }

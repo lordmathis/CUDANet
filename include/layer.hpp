@@ -20,7 +20,7 @@ class Layer {
 
     virtual ~Layer(){};
 
-    virtual CUDANet::Tensor& forward(CUDANet::Tensor &input) = 0;
+    virtual CUDANet::Tensor& forward(const CUDANet::Tensor &input) = 0;
     
     virtual CUDANet::Shape input_shape() = 0;
 

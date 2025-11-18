@@ -22,6 +22,12 @@ public:
 
     Tensor() = default;
     Tensor(Shape shape, DType dtype, CUDANet::Backend* backend);
+
+    Tensor(Tensor&& other) noexcept;
+    Tensor& operator=(Tensor&& other) noexcept;
+    Tensor(const Tensor&) = delete;
+    Tensor& operator=(const Tensor&) = delete;
+
     ~Tensor();
 
     size_t size() const;
