@@ -33,6 +33,11 @@ public:
     template <typename T>
     T* data();
 
+    void zero();
+
+    template <typename T>
+    void set_data(T *data);
+
 private:
     Shape       shape;
     DType       dtype;

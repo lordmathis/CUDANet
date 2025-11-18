@@ -17,7 +17,7 @@ public:
 
     // Tensor ops
     virtual void print(const CUDANet::Tensor &input) = 0;
-    virtual void clear(CUDANet::Tensor &input) = 0;
+    virtual void zero(CUDANet::Tensor &input) = 0;
     virtual void sum(const CUDANet::Tensor &input, CUDANet::Tensor &sum) = 0;
     virtual void max(const CUDANet::Tensor &input, CUDANet::Tensor &max) = 0;
 

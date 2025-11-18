@@ -1,13 +1,13 @@
 #include <iostream>
 
-#include "backend/backend.hpp"
+#include "backend.hpp"
 #include "backend/cuda.cuh"
 #include "utils/cuda_helper.cuh"
 #include "kernels/matmul.cuh"
 
 using namespace CUDANet::Backend;
 
-void CUDA::print(const CUDANet::Backend::Tensor &input) {
+void CUDA::print(const CUDANet::Tensor &input) {
     auto length = input.numel();
     std::vector<float> h_vec(input.numel());
 
@@ -22,11 +22,11 @@ void CUDA::print(const CUDANet::Backend::Tensor &input) {
     std::cout << std::endl;
 }
 
-void CUDA::clear(CUDANet::Backend::Tensor &input) {
+void CUDA::zero(CUDANet::Tensor &input) {
     CUDA_CHECK(cudaMemset(input.data<float>(), 0, sizeof(float) * input.numel()));
 }
 
-void CUDA::sum(const CUDANet::Backend::Tensor &input, CUDANet::Backend::Tensor &sum) {
+void CUDA::sum(const CUDANet::Tensor &input, CUDANet::Tensor &sum) {
     auto length = input.numel();
     const int gridSize = ( + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
@@ -45,7 +45,7 @@ void CUDA::sum(const CUDANet::Backend::Tensor &input, CUDANet::Backend::Tensor &
     }
 }
 
-void CUDA::max(const CUDANet::Backend::Tensor &input, CUDANet::Backend::Tensor &max) {
+void CUDA::max(const CUDANet::Tensor &input, CUDANet::Tensor &max) {
     auto length = input.numel();
     const int grid_size = (length + BLOCK_SIZE - 1) / BLOCK_SIZE;
 

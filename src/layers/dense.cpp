@@ -1,80 +1,58 @@
-#include "dense.hpp"
-
+#include <format>
 #include <stdexcept>
 
-#include "activation.hpp"
+#include "dense.hpp"
 
 using namespace CUDANet::Layers;
 
-Dense::Dense(int inputSize, int outputSize, ActivationType activationType)
-    : inputSize(inputSize), outputSize(outputSize) {
+Dense::Dense(CUDANet::Backend *backend, CUDANet::Shape input_shape, CUDANet::Shape output_shape)
+    : backend(backend), in_shape(input_shape), out_shape(output_shape) {
     // Allocate memory for weights and biases
-    weights.resize(outputSize * inputSize);
-    biases.resize(outputSize);
 
-    initializeWeights();
-    initializeBiases();
+    if (input_shape.size() != 1) {
+        throw std::runtime_error(std::format("Invalid shape. Expected [1], got {}", input_shape));
+    }
+    
+    if (output_shape.size() != 1) {
+        throw std::runtime_error(std::format("Invalid shape. Expected [1], got {}", output_shape));
+    }
 
-    activation = new Activation(activationType, outputSize);
+    auto input_len = input_shape[0];
+    auto output_len = output_shape[0];
 
-#ifdef USE_CUDA
-    initCUDA();
-#endif
+    auto weights = CUDANet::Tensor{Shape(input_len * output_len), CUDANet::DType::FLOAT32, backend};
+    auto biases = CUDANet::Tensor(Shape(output_len), CUDANet::DType::FLOAT32, backend);
+
+    weights.zero();
+    biases.zero();
 }
 
-Dense::~Dense() {
-    delete activation;
-#ifdef USE_CUDA
-    delCUDA();
-#endif
+CUDANet::Tensor& Dense::forward(CUDANet::Tensor &input);
+
+CUDANet::Shape Dense::input_shape() {
+    return in_shape;
 }
 
-void Dense::initializeWeights() {
-    std::fill(weights.begin(), weights.end(), 0.0f);
+CUDANet::Shape Dense::output_shape() {
+    return out_shape;
 }
 
-void Dense::initializeBiases() {
-    std::fill(biases.begin(), biases.end(), 0.0f);
-}
+size_t Dense::input_size() {
+    return in_shape[0];
+};
 
-float* Dense::forwardCPU(const float* input) {
-    throw std::logic_error("Not implemented");
-}
+size_t Dense::output_size() {
+    return out_shape[0];
+};
 
-float* Dense::forward(const float* input) {
-#ifdef USE_CUDA
-    return forwardCUDA(input);
-#else
-    return forwardCPU(input);
-#endif
-}
+void Dense::set_weights(CUDANet::Tensor &input);
 
-void Dense::setWeights(const float* weights_input) {
-    std::copy(weights_input, weights_input + weights.size(), weights.begin());
-#ifdef USE_CUDA
-    toCuda();
-#endif
-}
-
-std::vector<float> Dense::getWeights() {
+CUDANet::Tensor& Dense::get_weights() {
     return weights;
 }
 
-void Dense::setBiases(const float* biases_input) {
-    std::copy(biases_input, biases_input + biases.size(), biases.begin());
-#ifdef USE_CUDA
-    toCuda();
-#endif
-}
+void Dense::set_biases(CUDANet::Tensor &input);
 
-std::vector<float> Dense::getBiases() {
+CUDANet::Tensor& Dense::get_biases() {
     return biases;
-}
-
-int Dense::getOutputSize() {
-    return outputSize;
-}
-
-int Dense::getInputSize() {
-    return inputSize;
 }

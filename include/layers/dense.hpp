@@ -1,9 +1,8 @@
-#ifndef CUDANET_DENSE_LAYER_H
-#define CUDANET_DENSE_LAYER_H
+#pragma once
 
 #include <vector>
 
-#include "activation.hpp"
+#include "backend.hpp"
 #include "layer.hpp"
 
 namespace CUDANet::Layers {
@@ -12,121 +11,67 @@ namespace CUDANet::Layers {
  * @brief Dense (fully connected) layer
  *
  */
-class Dense : public WeightedLayer {
+class Dense : public Layer {
   public:
-    /**
-     * @brief Construct a new Dense layer
-     *
-     * @param inputSize Size of the input vector
-     * @param outputSize Size of the output vector
-     * @param activationType Activation function type ('RELU', 'SIGMOID',
-     * 'SOFTMAX' or 'NONE')
-     */
-    Dense(int inputSize, int outputSize, Layers::ActivationType activationType);
 
-    /**
-     * @brief Destroy the Dense layer
-     *
-     */
+    Dense(CUDANet::Backend *backend, CUDANet::Shape input_shape, CUDANet::Shape output_shape);
+
     ~Dense();
 
-    /**
-     * @brief Forward pass of the dense layer
-     *
-     * @param d_input Device pointer to the input vector
-     * @return Device pointer to the output vector
-     */
-    float* forward(const float* d_input);
+    CUDANet::Tensor& forward(CUDANet::Tensor &input);
 
-    /**
-     * @brief Set the weights of the layer
-     *
-     * @param weights Pointer to vector of weights
-     */
-    void setWeights(const float* weights);
+    CUDANet::Shape input_shape();
 
-    /**
-     * @brief Get the weights of the layer
-     *
-     * @return Vector of weights
-     */
-    std::vector<float> getWeights();
+    CUDANet::Shape output_shape();
 
-    /**
-     * @brief Set the biases of the layer
-     *
-     * @param biases Pointer to vector of biases
-     */
-    void setBiases(const float* biases);
+    size_t input_size();
 
-    /**
-     * @brief Get the biases of the layer
-     *
-     * @return Vector of biases
-     */
-    std::vector<float> getBiases();
+    size_t output_size();
 
-    /**
-     * @brief Get output size
-     *
-     * @return int output size
-     */
-    int getOutputSize();
+    void set_weights(CUDANet::Tensor &input);
 
-    /**
-     * @brief Get input size
-     *
-     * @return int input size
-     */
-    int getInputSize();
+    CUDANet::Tensor& get_weights();
+
+    void set_biases(CUDANet::Tensor &input);
+
+    CUDANet::Tensor& get_biases();
 
   private:
-    int inputSize;
-    int outputSize;
+    CUDANet::Backend *backend;
 
-    std::vector<float> weights;
-    std::vector<float> biases;
+    CUDANet::Shape in_shape;
+    CUDANet::Shape out_shape;
 
-    Layers::Activation* activation;
+    CUDANet::Tensor weights;
+    CUDANet::Tensor biases;
 
-    /**
-     * @brief Initialize the weights to zeros
-     *
-     */
-    void initializeWeights();
 
-    /**
-     * @brief Initialize the biases to zeros
-     *
-     */
-    void initializeBiases();
+    void init_weights();
+    void init_biases();
 
-    float* forwardCPU(const float* input);
+// #ifdef USE_CUDA
+//     float* d_output;
 
-#ifdef USE_CUDA
-    float* d_output;
+//     float* d_weights;
+//     float* d_biases;
 
-    float* d_weights;
-    float* d_biases;
+//     // Precompute kernel launch parameters
+//     int forwardGridSize;
+//     int biasGridSize;
 
-    // Precompute kernel launch parameters
-    int forwardGridSize;
-    int biasGridSize;
+//     /**
+//      * @brief Copy the weights and biases to the device
+//      *
+//      */
+//     void toCuda();
 
-    /**
-     * @brief Copy the weights and biases to the device
-     *
-     */
-    void toCuda();
+//     void initCUDA();
+//     void delCUDA();
 
-    void initCUDA();
-    void delCUDA();
-
-    float* forwardCUDA(const float* d_input);
-#endif
+//     float* forwardCUDA(const float* d_input);
+// #endif
 
 };
 
 }  // namespace CUDANet::Layers
 
-#endif  // CUDANET_DENSE_LAYER_H

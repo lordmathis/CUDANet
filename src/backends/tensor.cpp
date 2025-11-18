@@ -50,3 +50,7 @@ template <typename T>
 T* Tensor::data() {
     return static_cast<T*>(d_ptr);
 }
+
+void Tensor::zero() {
+    backend->zero(*this);
+}

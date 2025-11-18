@@ -13,7 +13,7 @@ public:
 
     // Tensor ops
     void print(const CUDANet::Tensor &input) override;
-    void clear(CUDANet::Tensor &input) override;
+    void zero(CUDANet::Tensor &input) override;
     void sum(const CUDANet::Tensor &input, CUDANet::Tensor &sum) override;
     void max(const CUDANet::Tensor &input, CUDANet::Tensor &max) override;
 
