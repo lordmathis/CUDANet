@@ -26,9 +26,9 @@ class Layer {
 
     virtual CUDANet::Shape output_shape() = 0;
 
-    virtual int input_size() = 0;
+    virtual size_t input_size() = 0;
 
-    virtual int output_size() = 0;
+    virtual size_t output_size() = 0;
 
     virtual void set_weights(CUDANet::Tensor &input) = 0;
 

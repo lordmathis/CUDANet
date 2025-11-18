@@ -1,8 +1,8 @@
 #pragma once
 
-#include "backend/tensor.hpp"
-#include "backend/backend.hpp"
-#include "layers/layer.hpp"
+#include "tensor.hpp"
+#include "backend.hpp"
+#include "layer.hpp"
 
 namespace CUDANet::Layers {
 
@@ -20,40 +20,41 @@ enum ActivationType { SIGMOID, RELU, SOFTMAX, NONE };
  * @brief Utility class that performs activation
  * 
  */
-class Activation : Layer {
+class Activation : public Layer {
   public:
 
     Activation() = default;
 
-    /**
-     * @brief Construct a new Activation object
-     * 
-     * @param activation Type of activation
-     * @param length     Length of the input
-     */
-    Activation(CUDANet::Backend::IBackend* backend, ActivationType activation, const int length);
+    Activation(CUDANet::Backend* backend, ActivationType activation, const CUDANet::Shape &shape);
 
-    /**
-     * @brief Destroy the Activation object
-     * 
-     */
-    ~Activation();
+    ~Activation() = default;
 
-    /**
-     * @brief Run the activation function on the input
-     * 
-     * @param d_input Pointer to the input vector on the device
-     */
-    void activate(CUDANet::Backend::Tensor input);
+    CUDANet::Tensor& forward(CUDANet::Tensor &input);
+    
+    CUDANet::Shape input_shape();
+
+    CUDANet::Shape output_shape();
+
+    size_t input_size();
+
+    size_t output_size();
+
+    void set_weights(CUDANet::Tensor &input);
+
+    CUDANet::Tensor& get_weights();
+
+    void set_biases(CUDANet::Tensor &input);
+
+    CUDANet::Tensor& get_biases();
 
 
   private:
-    CUDANet::Backend::IBackend* backend;
+    CUDANet::Backend* backend;
     ActivationType activationType;
-    int length;
+    CUDANet::Shape shape;
 
-    CUDANet::Backend::Tensor softmax_sum;
-    CUDANet::Backend::Tensor tensor_max;
+    CUDANet::Tensor softmax_sum;
+    CUDANet::Tensor tensor_max;
 };
 
 }  // namespace CUDANet::Layers

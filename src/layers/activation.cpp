@@ -1,22 +1,28 @@
+#include <format>
 #include <stdexcept>
 #include <vector>
 
 #include "activation.hpp"
-#include "backend/tensor.hpp"
+#include "tensor.hpp"
 
 using namespace CUDANet::Layers;
 
-Activation::Activation(CUDANet::Backend::IBackend* backend, ActivationType activation, const int length)
-    : backend(backend), activationType(activation), length(length) {
+Activation::Activation(CUDANet::Backend* backend, ActivationType activation, const CUDANet::Shape &shape)
+    : backend(backend), activationType(activation), shape(shape) {
 
+    if (shape.size() != 1) {
+        throw std::runtime_error(std::format("Invalid shape. Expected [1], got {}", shape));
+    }
+
+    auto length = shape[0];
 
     if (activationType == SOFTMAX) {
-      softmax_sum = CUDANet::Backend::Tensor({static_cast<size_t>(length)}, CUDANet::Backend::DType::FLOAT32, backend);
-      tensor_max = CUDANet::Backend::Tensor({static_cast<size_t>(length)}, CUDANet::Backend::DType::FLOAT32, backend);
+      softmax_sum = CUDANet::Tensor({static_cast<size_t>(length)}, CUDANet::DType::FLOAT32, backend);
+      tensor_max = CUDANet::Tensor({static_cast<size_t>(length)}, CUDANet::DType::FLOAT32, backend);
     }
 }
 
-void Activation::activate(CUDANet::Backend::Tensor input) {
+CUDANet::Tensor& Activation::forward(CUDANet::Tensor &input) {
     switch (activationType)
     {
     case ActivationType::SIGMOID:
@@ -31,4 +37,30 @@ void Activation::activate(CUDANet::Backend::Tensor input) {
     default:
         break;
     }
+
+    return input;
 }
+
+CUDANet::Shape Activation::input_shape() {
+    return shape;
+}
+
+CUDANet::Shape Activation::output_shape() {
+    return shape;
+}
+
+size_t Activation::input_size() {
+    return shape[0];
+}
+
+size_t Activation::output_size() {
+    return shape[0];
+}
+
+void Activation::set_weights(CUDANet::Tensor &input) {}
+
+CUDANet::Tensor& Activation::get_weights() {}
+
+void Activation::set_biases(CUDANet::Tensor &input) {}
+
+CUDANet::Tensor& Activation::get_biases() {}

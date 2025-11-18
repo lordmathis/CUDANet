@@ -1,10 +1,10 @@
-#include "backend/tensor.hpp"
-
 #include <stdexcept>
 
-using namespace CUDANet::Backend;
+#include "tensor.hpp"
 
-Tensor::Tensor(Shape shape, DType dtype, IBackend* backend)
+using namespace CUDANet;
+
+Tensor::Tensor(Shape shape, DType dtype, Backend* backend)
     : shape(shape), dtype(dtype), backend(backend), d_ptr(nullptr) {
     // Count total elements
     size_t count = 1;

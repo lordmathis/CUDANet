@@ -21,7 +21,7 @@ class Tensor
 public:
 
     Tensor() = default;
-    Tensor(Shape shape, DType dtype, CUDANet::Backend::IBackend* backend);
+    Tensor(Shape shape, DType dtype, CUDANet::Backend* backend);
     ~Tensor();
 
     size_t size() const;
@@ -40,7 +40,7 @@ private:
     size_t total_elms;
     size_t total_size;
 
-    CUDANet::Backend::IBackend*   backend;
+    CUDANet::Backend*   backend;
     void*       d_ptr;
 };
 
