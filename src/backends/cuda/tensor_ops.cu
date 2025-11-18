@@ -26,6 +26,10 @@ void CUDA::zero(CUDANet::Tensor &input) {
     CUDA_CHECK(cudaMemset(input.data<float>(), 0, sizeof(float) * input.numel()));
 }
 
+void CUDA::copy_to_device(CUDANet::Tensor &tensor, void *data, size_t size) {
+    CUDA_CHECK(cudaMemcpy(tensor.data<float>(), data, size, cudaMemcpyHostToDevice));
+}
+
 void CUDA::sum(const CUDANet::Tensor &input, CUDANet::Tensor &sum) {
     auto length = input.numel();
     const int gridSize = ( + BLOCK_SIZE - 1) / BLOCK_SIZE;

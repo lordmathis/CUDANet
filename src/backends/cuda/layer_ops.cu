@@ -46,3 +46,23 @@ void CUDA::softmax(Tensor &tensor, Tensor &temp_max, Tensor &temp_sum) {
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
 }
+
+CUDANet::Tensor& CUDA::dense(CUDANet::Tensor &weights, CUDANet::Tensor &biases, CUDANet::Tensor &input, CUDANet::Tensor &output, size_t input_size, size_t output_size) {
+
+    auto forwardGridSize =
+        (std::max(input_size, output_size) + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    auto biasGridSize = (output_size + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    Kernels::mat_vec_mul<<<forwardGridSize, BLOCK_SIZE>>>(
+        weights.data<float>(), input.data<float>(), output.data<float>(), input_size, output_size
+    );
+    CUDA_CHECK(cudaGetLastError());
+
+    Kernels::vec_vec_add<<<biasGridSize, BLOCK_SIZE>>>(
+        biases.data<float>(), output.data<float>(), output.data<float>(), output_size
+    );
+    CUDA_CHECK(cudaGetLastError());
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    return output;
+}

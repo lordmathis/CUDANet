@@ -30,11 +30,11 @@ class Layer {
 
     virtual size_t output_size() = 0;
 
-    virtual void set_weights(CUDANet::Tensor &input) = 0;
+    virtual void set_weights(void *input) = 0;
 
     virtual CUDANet::Tensor& get_weights() = 0;
 
-    virtual void set_biases(CUDANet::Tensor &input) = 0;
+    virtual void set_biases(void *input) = 0;
 
     virtual CUDANet::Tensor& get_biases() = 0;
 };

@@ -54,3 +54,8 @@ T* Tensor::data() {
 void Tensor::zero() {
     backend->zero(*this);
 }
+
+template <typename T>
+void Tensor::set_data(T *data) {
+    backend->copy_to_device(*this, data, total_size)
+}

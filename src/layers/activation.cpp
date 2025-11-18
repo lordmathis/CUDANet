@@ -57,10 +57,10 @@ size_t Activation::output_size() {
     return shape[0];
 }
 
-void Activation::set_weights(CUDANet::Tensor &input) {}
+void Activation::set_weights(void *input) {}
 
 CUDANet::Tensor& Activation::get_weights() {}
 
-void Activation::set_biases(CUDANet::Tensor &input) {}
+void Activation::set_biases(void *input) {}
 
 CUDANet::Tensor& Activation::get_biases() {}

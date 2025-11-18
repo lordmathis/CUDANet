@@ -18,23 +18,23 @@ class Dense : public Layer {
 
     ~Dense();
 
-    CUDANet::Tensor& forward(CUDANet::Tensor &input);
+    CUDANet::Tensor& forward(CUDANet::Tensor &input) override;
 
-    CUDANet::Shape input_shape();
+    CUDANet::Shape input_shape() override;
 
-    CUDANet::Shape output_shape();
+    CUDANet::Shape output_shape() override;
 
-    size_t input_size();
+    size_t input_size() override;
 
-    size_t output_size();
+    size_t output_size() override;
 
-    void set_weights(CUDANet::Tensor &input);
+    void set_weights(void *input) override;
 
-    CUDANet::Tensor& get_weights();
+    CUDANet::Tensor& get_weights() override;
 
-    void set_biases(CUDANet::Tensor &input);
+    void set_biases(void *input) override;
 
-    CUDANet::Tensor& get_biases();
+    CUDANet::Tensor& get_biases() override;
 
   private:
     CUDANet::Backend *backend;
@@ -45,32 +45,7 @@ class Dense : public Layer {
     CUDANet::Tensor weights;
     CUDANet::Tensor biases;
 
-
-    void init_weights();
-    void init_biases();
-
-// #ifdef USE_CUDA
-//     float* d_output;
-
-//     float* d_weights;
-//     float* d_biases;
-
-//     // Precompute kernel launch parameters
-//     int forwardGridSize;
-//     int biasGridSize;
-
-//     /**
-//      * @brief Copy the weights and biases to the device
-//      *
-//      */
-//     void toCuda();
-
-//     void initCUDA();
-//     void delCUDA();
-
-//     float* forwardCUDA(const float* d_input);
-// #endif
-
+    CUDANet::Tensor output;
 };
 
 }  // namespace CUDANet::Layers
