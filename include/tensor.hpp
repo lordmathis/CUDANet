@@ -34,15 +34,21 @@ public:
     size_t numel() const;
 
     template <typename T>
-    const T* data() const;
+    const T* data() const {
+        return static_cast<T*>(d_ptr);
+    }
 
     template <typename T>
-    T* data();
+    T* data() {
+        return static_cast<T*>(d_ptr);
+    }
 
     void zero();
 
     template <typename T>
-    void set_data(T *data);
+    void set_data(T *data) {
+        backend->copy_to_device(*this, data, total_size);
+    }
 
 private:
     Shape       shape;

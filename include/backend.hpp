@@ -2,9 +2,10 @@
 
 #include <cstddef>
 
-#include "tensor.hpp"
-
 namespace CUDANet {
+
+// Forward declaration
+class Tensor;
 
 class Backend {
   public:

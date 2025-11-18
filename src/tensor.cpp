@@ -68,8 +68,10 @@ Tensor& Tensor::operator=(Tensor&& other) noexcept {
 }
 
 Tensor::~Tensor() {
-    backend->deallocate(d_ptr);
-    d_ptr = nullptr;
+    if (backend && d_ptr) {
+        backend->deallocate(d_ptr);
+        d_ptr = nullptr;
+    }
 }
 
 size_t Tensor::numel() const {
@@ -80,21 +82,6 @@ size_t Tensor::size() const {
     return total_size;
 }
 
-template <typename T>
-const T* Tensor::data() const {
-    return static_cast<T*>(d_ptr);
-}
-
-template <typename T>
-T* Tensor::data() {
-    return static_cast<T*>(d_ptr);
-}
-
 void Tensor::zero() {
     backend->zero(*this);
-}
-
-template <typename T>
-void Tensor::set_data(T *data) {
-    backend->copy_to_device(*this, data, total_size);
 }
