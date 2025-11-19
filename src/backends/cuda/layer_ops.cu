@@ -2,6 +2,7 @@
 #include "kernels/activation_functions.cuh"
 #include "kernels/convolution.cuh"
 #include "kernels/matmul.cuh"
+#include "kernels/pooling.cuh"
 #include "utils/cuda_helper.cuh"
 
 using namespace CUDANet::Backend;
@@ -104,6 +105,32 @@ CUDANet::Tensor& CUDA::conv2d(
         input.data<float>(), weights.data<float>(), biases.data<float>(),
         output.data<float>(), in_shape, padding_shape, kernel_shape,
         stride_shape, out_shape
+    );
+    CUDA_CHECK(cudaGetLastError());
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    return output;
+}
+
+CUDANet::Tensor& CUDA::maxPool2d(
+    const CUDANet::Tensor& input,
+    CUDANet::Tensor& output,
+    CUDANet::Shape input_shape,
+    CUDANet::Shape pool_shape,
+    CUDANet::Shape stride_shape,
+    CUDANet::Shape padding_shape,
+    CUDANet::Shape output_shape
+) {
+    dim3 block(8, 8, 8);
+    dim3 grid(
+        (output_shape[0] + block.x - 1) / block.x,
+        (output_shape[1] + block.y - 1) / block.y,
+        (output_shape[2] + block.z - 1) / block.z
+    );
+
+    Kernels::max_pool<<<grid, block>>>(
+        input.data<float>(), output.data<float>(), input_shape, output_shape, pool_shape,
+        stride_shape, padding_shape
     );
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());

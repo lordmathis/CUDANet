@@ -52,6 +52,16 @@ class Backend {
         const CUDANet::Shape stride_shape,
         const CUDANet::Shape out_shape
     ) = 0;
+
+    virtual CUDANet::Tensor& maxPool2d(
+        const CUDANet::Tensor& input,
+        CUDANet::Tensor& output,
+        CUDANet::Shape input_shape,
+        CUDANet::Shape pool_shape,
+        CUDANet::Shape stride_shape,
+        CUDANet::Shape padding_shape,
+        CUDANet::Shape output_shape
+    ) = 0;
 };
 
 }  // namespace CUDANet

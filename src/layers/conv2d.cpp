@@ -83,7 +83,7 @@ Conv2d::Conv2d(
 
 Conv2d::~Conv2d() {}
 
-CUDANet::Tensor& Conv2d::forward(CUDANet::Tensor& input) {
+CUDANet::Tensor& Conv2d::forward( CUDANet::Tensor& input) {
     output.zero();
     backend->conv2d(
         weights,

@@ -48,6 +48,16 @@ class CUDA : public Backend {
         const CUDANet::Shape stride_shape,
         const CUDANet::Shape out_shape
     ) override;
+
+    CUDANet::Tensor& CUDA::maxPool2d(
+        const CUDANet::Tensor& input,
+        CUDANet::Tensor& output,
+        CUDANet::Shape input_shape,
+        CUDANet::Shape pool_shape,
+        CUDANet::Shape stride_shape,
+        CUDANet::Shape padding_shape,
+        CUDANet::Shape output_shape
+    ) override;
 };
 
 }  // namespace CUDANet::Backend
