@@ -12,7 +12,7 @@
 namespace CUDANet {
 
 /**
- * @brief Basic Sequential Layer
+ * @brief Basic Layer
  *
  */
 class Layer {

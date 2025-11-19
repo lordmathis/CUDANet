@@ -23,7 +23,7 @@ Conv2d::Conv2d(
     if (in_shape.size() != 3) {
         throw std::runtime_error(
             std::format(
-                "Invalid input shape. Expected 3 dims, got {}", in_shape
+                "Invalid input shape. Expected 3 dims, got {}", in_shape.size()
             )
         );
     }
@@ -31,7 +31,7 @@ Conv2d::Conv2d(
     if (kernel_shape.size() != 3) {
         throw std::runtime_error(
             std::format(
-                "Invalid kernel shape. Expected 3 dims, got {}", kernel_shape
+                "Invalid kernel shape. Expected 3 dims, got {}", kernel_shape.size()
             )
         );
     }
@@ -39,7 +39,7 @@ Conv2d::Conv2d(
     if (stride_shape.size() != 2) {
         throw std::runtime_error(
             std::format(
-                "Invalid stride shape. Expected 2 dims, got {}", stride_shape
+                "Invalid stride shape. Expected 2 dims, got {}", stride_shape.size()
             )
         );
     }
@@ -47,7 +47,7 @@ Conv2d::Conv2d(
     if (padding_shape.size() != 2) {
         throw std::runtime_error(
             std::format(
-                "Invalid padding shape. Expected 2 dims, got {}", padding_shape
+                "Invalid padding shape. Expected 2 dims, got {}", padding_shape.size()
             )
         );
     }
