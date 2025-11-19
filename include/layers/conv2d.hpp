@@ -23,7 +23,7 @@ class Conv2d : public Layer {
 
     ~Conv2d() {};
 
-    CUDANet::Tensor& forward(const CUDANet::Tensor& input) override;
+    CUDANet::Tensor& forward(CUDANet::Tensor& input) override;
 
     CUDANet::Shape input_shape() override;
 

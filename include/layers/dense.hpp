@@ -18,7 +18,7 @@ class Dense : public Layer {
 
     ~Dense();
 
-    CUDANet::Tensor& forward(const CUDANet::Tensor &input) override;
+    CUDANet::Tensor& forward(CUDANet::Tensor &input) override;
 
     CUDANet::Shape input_shape() override;
 
