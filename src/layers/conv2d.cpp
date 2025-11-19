@@ -1,111 +1,136 @@
-#include <stdexcept>
-#include <vector>
-
-#include "activation.hpp"
 #include "conv2d.hpp"
+
+#include <format>
+#include <stdexcept>
+
 #include "layer.hpp"
+#include "tensor.hpp"
 
 using namespace CUDANet::Layers;
 
 Conv2d::Conv2d(
-    shape2d        inputSize,
-    int            inputChannels,
-    shape2d        kernelSize,
-    shape2d        stride,
-    int            numFilters,
-    shape2d        paddingSize,
-    ActivationType activationType
+    CUDANet::Shape    input_shape,
+    CUDANet::Shape    kernel_shape,
+    CUDANet::Shape    stride_shape,
+    CUDANet::Shape    padding_shape,
+    CUDANet::Backend* backend
 )
-    : inputSize(inputSize),
-      inputChannels(inputChannels),
-      kernelSize(kernelSize),
-      stride(stride),
-      numFilters(numFilters),
-      paddingSize(paddingSize) {
-    outputSize = {
-        (inputSize.first - kernelSize.first + 2 * paddingSize.first) /
-                stride.first +
-            1,
-        (inputSize.second - kernelSize.second + 2 * paddingSize.second) /
-                stride.second +
-            1
-    };
+    : in_shape(input_shape),
+      kernel_shape(kernel_shape),
+      stride_shape(stride_shape),
+      padding_shape(padding_shape),
+      backend(backend) {
+    if (in_shape.size() != 3) {
+        throw std::runtime_error(
+            std::format(
+                "Invalid input shape. Expected 3 dims, got {}", in_shape
+            )
+        );
+    }
 
-    activation = new Activation(
-        activationType, outputSize.first * outputSize.second * numFilters
+    if (kernel_shape.size() != 3) {
+        throw std::runtime_error(
+            std::format(
+                "Invalid kernel shape. Expected 3 dims, got {}", kernel_shape
+            )
+        );
+    }
+
+    if (stride_shape.size() != 2) {
+        throw std::runtime_error(
+            std::format(
+                "Invalid stride shape. Expected 2 dims, got {}", stride_shape
+            )
+        );
+    }
+
+    if (padding_shape.size() != 2) {
+        throw std::runtime_error(
+            std::format(
+                "Invalid padding shape. Expected 2 dims, got {}", padding_shape
+            )
+        );
+    }
+
+    size_t out_h = (in_shape[0] - kernel_shape[0] + 2 * padding_shape[0]) /
+                       stride_shape[0] +
+                   1;
+    size_t out_w = (in_shape[1] - kernel_shape[1] + 2 * padding_shape[1]) /
+                       stride_shape[1] +
+                   1;
+    out_shape.resize(3);
+    out_shape[0] = out_h;
+    out_shape[1] = out_w;
+    out_shape[2] = kernel_shape[2];
+    output = CUDANet::Tensor(
+        Shape{out_shape[0] * out_shape[1] * out_shape[3]},
+        CUDANet::DType::FLOAT32, backend
     );
 
-    weights.resize(
-        kernelSize.first * kernelSize.second * inputChannels * numFilters
+    weights = CUDANet::Tensor(
+        Shape{
+            kernel_shape[0] * kernel_shape[1] * kernel_shape[2] * in_shape[2]
+        },
+        CUDANet::DType::FLOAT32, backend
     );
-    initializeWeights();
+    biases = CUDANet::Tensor(
+        Shape{kernel_shape[2]}, CUDANet::DType::FLOAT32, backend
+    );
 
-    biases.resize(numFilters);
-    initializeBiases();
-
-#ifdef USE_CUDA
-    initCUDA();
-    toCuda();
-#endif
+    weights.zero();
+    biases.zero();
 }
 
-Conv2d::~Conv2d() {
-#ifdef USE_CUDA
-    delCUDA();
-#endif
-    delete activation;
+Conv2d::~Conv2d() {}
+
+CUDANet::Tensor& Conv2d::forward(const CUDANet::Tensor& input) {
+    output.zero();
+    backend->conv2d(
+        weights,
+        biases,
+        input,
+        output,
+        in_shape,
+        padding_shape,
+        kernel_shape,
+        stride_shape,
+        out_shape
+    );
+    return output;
 }
 
-void Conv2d::initializeWeights() {
-    std::fill(weights.begin(), weights.end(), 0.0f);
+CUDANet::Shape Conv2d::input_shape() {
+    return in_shape;
 }
 
-void Conv2d::initializeBiases() {
-    std::fill(biases.begin(), biases.end(), 0.0f);
+CUDANet::Shape Conv2d::output_shape() {
+    return out_shape;
 }
 
-void Conv2d::setWeights(const float* weights_input) {
-    std::copy(weights_input, weights_input + weights.size(), weights.begin());
-#ifdef USE_CUDA
-    toCuda();
-#endif
+size_t Conv2d::input_size() {
+    return sizeof(float) * in_shape[0] * in_shape[1] * in_shape[2];
 }
 
-std::vector<float> Conv2d::getWeights() {
+size_t Conv2d::output_size() {
+    return sizeof(float) * out_shape[0] * out_shape[1] * out_shape[2];
+}
+
+void Conv2d::set_weights(void* input) {
+    weights.set_data<float>(static_cast<float*>(input));
+}
+
+CUDANet::Tensor& Conv2d::get_weights() {
     return weights;
 }
 
-void Conv2d::setBiases(const float* biases_input) {
-    std::copy(biases_input, biases_input + biases.size(), biases.begin());
-#ifdef USE_CUDA
-    toCuda();
-#endif
+void Conv2d::set_biases(void* input) {
+    biases.set_data<float>(static_cast<float*>(input));
 }
 
-std::vector<float> Conv2d::getBiases() {
+CUDANet::Tensor& Conv2d::get_biases() {
     return biases;
 }
 
-float* Conv2d::forwardCPU(const float* input) {
-    throw std::logic_error("Not implemented");
-}
-
-float* Conv2d::forward(const float* input) {
-#ifdef USE_CUDA
-    return forwardCUDA(input);
-#else
-    return forwardCPU(input);
-#endif
-}
-
-int Conv2d::getOutputSize() {
-    return outputSize.first * outputSize.second * numFilters;
-}
-
-int Conv2d::getInputSize() {
-    return inputSize.first * inputSize.second * inputChannels;
-}
-
-shape2d Conv2d::getOutputDims() {
-    return outputSize;
+CUDANet::Shape Conv2d::get_padding_shape() {
+    return padding_shape;
 }

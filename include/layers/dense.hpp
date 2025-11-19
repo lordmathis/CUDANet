@@ -14,7 +14,7 @@ namespace CUDANet::Layers {
 class Dense : public Layer {
   public:
 
-    Dense(CUDANet::Backend *backend, CUDANet::Shape input_shape, CUDANet::Shape output_shape);
+    Dense(CUDANet::Shape input_shape, CUDANet::Shape output_shape, CUDANet::Backend *backend);
 
     ~Dense();
 

@@ -40,6 +40,18 @@ class Backend {
         const size_t           input_size,
         const size_t           output_size
     ) = 0;
+
+    virtual CUDANet::Tensor& conv2d(
+        const CUDANet::Tensor& weights,
+        const CUDANet::Tensor& biases,
+        const CUDANet::Tensor& input,
+        CUDANet::Tensor& output,
+        const CUDANet::Shape in_shape,
+        const CUDANet::Shape padding_shape,
+        const CUDANet::Shape kernel_shape,
+        const CUDANet::Shape stride_shape,
+        const CUDANet::Shape out_shape
+    ) = 0;
 };
 
 }  // namespace CUDANet

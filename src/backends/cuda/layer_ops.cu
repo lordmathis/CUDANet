@@ -1,5 +1,6 @@
 #include "backend/cuda.cuh"
 #include "kernels/activation_functions.cuh"
+#include "kernels/convolution.cuh"
 #include "kernels/matmul.cuh"
 #include "utils/cuda_helper.cuh"
 
@@ -57,7 +58,7 @@ CUDANet::Tensor& CUDA::dense(
     const CUDANet::Tensor& weights,
     const CUDANet::Tensor& biases,
     const CUDANet::Tensor& input,
-    CUDANet::Tensor& output,
+    CUDANet::Tensor&       output,
     const size_t           input_size,
     const size_t           output_size
 ) {
@@ -74,6 +75,35 @@ CUDANet::Tensor& CUDA::dense(
     Kernels::vec_vec_add<<<biasGridSize, BLOCK_SIZE>>>(
         biases.data<float>(), output.data<float>(), output.data<float>(),
         output_size
+    );
+    CUDA_CHECK(cudaGetLastError());
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    return output;
+}
+
+CUDANet::Tensor& CUDA::conv2d(
+    const CUDANet::Tensor& weights,
+    const CUDANet::Tensor& biases,
+    const CUDANet::Tensor& input,
+    CUDANet::Tensor&       output,
+    const CUDANet::Shape   in_shape,
+    const CUDANet::Shape   padding_shape,
+    const CUDANet::Shape   kernel_shape,
+    const CUDANet::Shape   stride_shape,
+    const CUDANet::Shape   out_shape
+) {
+    dim3 block(8, 8, 8);
+    dim3 grid(
+        (out_shape[0] + block.x - 1) / block.x,
+        (out_shape[1] + block.y - 1) / block.y,
+        (out_shape[3] + block.z - 1) / block.z
+    );
+
+    Kernels::convolution<<<grid, block>>>(
+        input.data<float>(), weights.data<float>(), biases.data<float>(),
+        output.data<float>(), in_shape, padding_shape, kernel_shape,
+        stride_shape, out_shape
     );
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());

@@ -49,25 +49,5 @@ void Conv2d::toCuda() {
 
 float* Conv2d::forwardCUDA(const float* d_input) {
     // Convolve
-    dim3 block(8, 8, 8);
-    dim3 grid(
-        (outputSize.first + block.x - 1) / block.x,
-        (outputSize.second + block.y - 1) / block.y,
-        (numFilters + block.z - 1) / block.z
-    );
 
-    CUDANet::Utils::clear(d_output, outputSize.first * outputSize.second * numFilters);
-
-    Kernels::convolution<<<grid, block>>>(
-        d_input, d_weights, d_biases, d_output, inputSize, inputChannels,
-        paddingSize, kernelSize, stride, numFilters, outputSize
-    );
-    CUDA_CHECK(cudaGetLastError());
-
-    // Apply activation
-    activation->activate(d_output);
-
-    CUDA_CHECK(cudaDeviceSynchronize());
-
-    return d_output;
 }

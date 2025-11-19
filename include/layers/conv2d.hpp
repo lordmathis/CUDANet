@@ -1,5 +1,4 @@
-#ifndef CUDANET_CONV_LAYER_H
-#define CUDANET_CONV_LAYER_H
+#pragma once
 
 #include <vector>
 
@@ -12,149 +11,52 @@ namespace CUDANet::Layers {
  * @brief 2D convolutional layer
  *
  */
-class Conv2d : public WeightedLayer, public TwoDLayer {
+class Conv2d : public Layer {
   public:
-    /**
-     * @brief Construct a new Conv 2d layer
-     *
-     * @param inputSize Width and height of the input matrix
-     * @param inputChannels Number of channels in the input matrix
-     * @param kernelSize Width and height of the convolution kernel
-     * @param stride Convolution stride
-     * @param numFilters Number of output filters
-     * @param paddingSize Padding size
-     * @param activationType Activation function type ('RELU', 'SIGMOID',
-     * 'SOFTMAX' or 'NONE')
-     */
     Conv2d(
-        shape2d        inputSize,
-        int            inputChannels,
-        shape2d        kernelSize,
-        shape2d        stride,
-        int            numFilters,
-        shape2d        paddingSize,
-        ActivationType activationType
+        CUDANet::Shape    input_shape,
+        CUDANet::Shape    kernel_shape,
+        CUDANet::Shape    stride_shape,
+        CUDANet::Shape    padding_shape,
+        CUDANet::Backend* backend
     );
 
-    /**
-     * @brief Destroy the Conv 2d object
-     *
-     */
-    ~Conv2d();
+    ~Conv2d() {};
 
-    /**
-     * @brief Forward pass of the convolutional layer
-     *
-     * @param d_input Device pointer to the input matrix
-     * @return Device pointer to the output matrix
-     */
-    float* forward(const float* d_input);
+    CUDANet::Tensor& forward(const CUDANet::Tensor& input) override;
 
-    /**
-     * @brief Set the weights of the convolutional layer
-     *
-     * @param weights_input Pointer to the weights
-     */
-    void setWeights(const float* weights_input);
+    CUDANet::Shape input_shape() override;
 
-    /**
-     * @brief Get the weights of the convolutional layer
-     *
-     * @return std::vector<float>
-     */
-    std::vector<float> getWeights();
+    CUDANet::Shape output_shape() override;
 
-    /**
-     * @brief Set the biases of the convolutional layer
-     *
-     * @param biases_input Pointer to the biases
-     */
-    void setBiases(const float* biases_input);
+    size_t input_size() override;
 
-    /**
-     * @brief Get the biases of the convolutional layer
-     *
-     * @return std::vector<float>
-     */
-    std::vector<float> getBiases();
+    size_t output_size();
 
-    /**
-     * @brief Get output size
-     *
-     * @return int output size
-     */
-    int getOutputSize();
+    void set_weights(void* input) override;
 
-    /**
-     * @brief Get input size
-     *
-     * @return int input size
-     */
-    int getInputSize();
+    CUDANet::Tensor& get_weights() override;
 
-    /**
-     * @brief Get the padding size of the layer
-     *
-     * @return int
-     */
-    shape2d getPaddingSize() {
-        return paddingSize;
-    }
+    void set_biases(void* input) override;
 
-    shape2d getOutputDims();
+    CUDANet::Tensor& get_biases() override;
+
+    CUDANet::Shape get_padding_shape();
 
   private:
-    // Inputs
-    shape2d inputSize;
-    int     inputChannels;
+    CUDANet::Backend* backend;
 
-    // Outputs
-    shape2d outputSize;
+    CUDANet::Shape in_shape;
+    CUDANet::Shape out_shape;
 
-    // Kernel
-    shape2d kernelSize;
-    shape2d stride;
-    shape2d paddingSize;
-    int     numFilters;
+    CUDANet::Shape kernel_shape;
+    CUDANet::Shape stride_shape;
+    CUDANet::Shape padding_shape;
 
-    // Kernels
-    std::vector<float> weights;
-    std::vector<float> biases;
+    CUDANet::Tensor weights;
+    CUDANet::Tensor biases;
 
-    float* forwardCPU(const float* input);
-
-// Cuda
-#ifdef USE_CUDA
-    float* d_output;
-    float* d_weights;
-    float* d_biases;
-
-    float* forwardCUDA(const float* d_input);
-    void   initCUDA();
-    void   delCUDA();
-
-    /**
-     * @brief Copy weights and biases to the device
-     *
-     */
-    void toCuda();
-#endif
-
-    Activation* activation;
-
-    /**
-     * @brief Initialize weights of the convolutional layer with zeros
-     *
-     */
-    void initializeWeights();
-
-    /**
-     * @brief Initialize biases of the convolutional layer with zeros
-     *
-     */
-    void initializeBiases();
+    CUDANet::Tensor output;
 };
 
 }  // namespace CUDANet::Layers
-
-#endif  // CUDANET_CONV_LAYER_H
