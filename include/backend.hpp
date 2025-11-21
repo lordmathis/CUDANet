@@ -84,6 +84,12 @@ class Backend {
         CUDANet::Tensor& running_var,
         CUDANet::Tensor& epsilon
     ) = 0;
+
+    virtual CUDANet::Tensor& concat(
+        CUDANet::Tensor& input_a,
+        CUDANet::Tensor& input_b,
+        CUDANet::Tensor& output
+    ) = 0;
 };
 
 }  // namespace CUDANet

@@ -80,6 +80,12 @@ class CUDA : public Backend {
         CUDANet::Tensor& running_var,
         CUDANet::Tensor& epsilon
     ) override;
+
+    CUDANet::Tensor& concat(
+        CUDANet::Tensor& input_a,
+        CUDANet::Tensor& input_b,
+        CUDANet::Tensor& output
+    ) override;
 };
 
 }  // namespace CUDANet::Backend

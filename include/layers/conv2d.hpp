@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-
-#include "activation.hpp"
 #include "layer.hpp"
 
 namespace CUDANet::Layers {

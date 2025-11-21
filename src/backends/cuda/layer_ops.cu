@@ -212,3 +212,23 @@ CUDANet::Tensor& CUDA::batch_norm(
         CUDA_CHECK(cudaGetLastError());
     }
 }
+
+CUDANet::Tensor& CUDA::concat(
+    CUDANet::Tensor& input_a,
+    CUDANet::Tensor& input_b,
+    CUDANet::Tensor& output
+) {
+    CUDA_CHECK(cudaMemcpy(
+        output.data<float>(), input_a.data<float>(), input_a.size(),
+        cudaMemcpyDeviceToDevice
+    ));
+
+    CUDA_CHECK(cudaMemcpy(
+        output.data<float>() + input_a.numel(), input_b.data<float>(), input_b.size(),
+        cudaMemcpyDeviceToDevice
+    ));
+
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    return output;
+}

@@ -1,5 +1,4 @@
-#ifndef CUDANET_CONCAT_LAYER_H
-#define CUDANET_CONCAT_LAYER_H
+#pragma once
 
 #include "layer.hpp"
 
@@ -11,47 +10,24 @@ namespace CUDANet::Layers {
  */
 class Concat {
   public:
-    /**
-     * @brief Create a new Concat layer
-     *
-     * @param inputASize Size of the first input
-     * @param inputBSize Size of the second input
-     */
-    Concat(const int inputASize, const int inputBSize);
 
-    /**
-     * @brief Destroy the Concat layer
-     *
-     */
+    Concat(const CUDANet::Shape a_shape, const CUDANet::Shape b_shape, CUDANet::Backend *backend);
+
     ~Concat();
 
-    /**
-     * @brief Concatenates the two inputs
-     *
-     * @param d_input_A Device pointer to the first input
-     * @param d_input_B Device pointer to the second input
-     *
-     * @return Device pointer to the output
-     */
-    float* forward(const float* d_input_A, const float* d_input_B);
+    CUDANet::Tensor& forward(CUDANet::Tensor& input_a, CUDANet::Tensor& input_b);
 
-    int getOutputSize();
+    CUDANet::Shape output_shape();
 
   private:
-    int inputASize;
-    int inputBSize;
+    CUDANet::Shape a_shape;
+    CUDANet::Shape b_shape;
 
-    float* forwardCPU(const float* input_A, const float* input_B);
+    CUDANet::Shape out_shape;
+    CUDANet::Tensor output;
 
-#ifdef USE_CUDA
-    float* d_output;
-    float* forwardCUDA(const float* d_input_A, const float* d_input_B);
-
-    void initCUDA();
-    void delCUDA();
-#endif
+    CUDANet::Backend *backend;
 };
 
 }  // namespace CUDANet::Layers
 
-#endif  // CUDANET_CONCAT_LAYER_H
