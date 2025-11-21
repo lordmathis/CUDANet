@@ -1,6 +1,6 @@
 #include "cuda_helper.cuh"
 #include "layer.hpp"
-#include "pooling.cuh"
+#include "pool.cuh"
 
 using namespace CUDANet;
 

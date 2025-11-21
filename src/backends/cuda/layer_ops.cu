@@ -137,3 +137,29 @@ CUDANet::Tensor& CUDA::maxPool2d(
 
     return output;
 }
+
+CUDANet::Tensor& CUDA::avgPool2d(
+    const CUDANet::Tensor& input,
+    CUDANet::Tensor& output,
+    CUDANet::Shape input_shape,
+    CUDANet::Shape pool_shape,
+    CUDANet::Shape stride_shape,
+    CUDANet::Shape padding_shape,
+    CUDANet::Shape output_shape
+) {
+    dim3 block(8, 8, 8);
+    dim3 grid(
+        (output_shape[0] + block.x - 1) / block.x,
+        (output_shape[1] + block.y - 1) / block.y,
+        (output_shape[2] + block.z - 1) / block.z
+    );
+
+    Kernels::avg_pool<<<grid, block>>>(
+        input.data<float>(), output.data<float>(), input_shape, output_shape, pool_shape,
+        stride_shape, padding_shape
+    );
+    CUDA_CHECK(cudaGetLastError());
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    return output;
+}

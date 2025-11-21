@@ -49,23 +49,43 @@ AvgPool2d::AvgPool2d(
 
 AvgPool2d::~AvgPool2d() {}
 
-CUDANet::Tensor& AvgPool2d::forward(CUDANet::Tensor& input);
+CUDANet::Tensor& AvgPool2d::forward(CUDANet::Tensor& input) {
+    output.zero();
+    backend->avgPool2d(
+        input,
+        output,
+        in_shape,
+        pool_shape,
+        stride_shape,
+        padding_shape,
+        out_shape
+    );
+    return output;
+}
 
-CUDANet::Shape AvgPool2d::input_shape();
+CUDANet::Shape AvgPool2d::input_shape() {
+    return in_shape;
+}
 
-CUDANet::Shape AvgPool2d::output_shape();
+CUDANet::Shape AvgPool2d::output_shape() {
+    return out_shape;
+}
 
-size_t AvgPool2d::input_size();
+size_t AvgPool2d::input_size() {
+    return sizeof(float) * in_shape[0] * in_shape[1] * in_shape[2];
+}
 
-size_t AvgPool2d::output_size();
+size_t AvgPool2d::output_size() {
+    return sizeof(float) * out_shape[0] * out_shape[1] * out_shape[3];
+}
 
-void AvgPool2d::set_weights(void* input);
+void AvgPool2d::set_weights(void* input) {}
 
-CUDANet::Tensor& AvgPool2d::get_weights();
+CUDANet::Tensor& AvgPool2d::get_weights() {}
 
-void AvgPool2d::set_biases(void* input);
+void AvgPool2d::set_biases(void* input) {}
 
-CUDANet::Tensor& AvgPool2d::get_biases();
+CUDANet::Tensor& AvgPool2d::get_biases() {}
 
 
 AdaptiveAvgPool2d::AdaptiveAvgPool2d(
@@ -73,15 +93,29 @@ AdaptiveAvgPool2d::AdaptiveAvgPool2d(
     CUDANet::Shape        output_shape,
     CUDANet::Backend *backend
 )
-    : AvgPool2d(input_shape, {1, 1}, {1, 1}, {0, 0}, backend) {
-    stride_shape = {
-        input_shape[0] / output_shape[0],
-        input_shape[1] / output_shape[1]
-    };
-    pool_shape = {
-        input_shape[0] - (output_shape[0] - 1) * stride_shape[0],
-        input_shape[1] - (output_shape[1] - 1) * stride_shape[1]
-    };
-    padding_shape    = {(pool_shape[0] - 1) / 2, (pool_shape[1] - 1) / 2};
+    : AvgPool2d(
+        input_shape,
+        // pool_shape
+        {
+            input_shape[0] - (output_shape[0] - 1) * (input_shape[0] / output_shape[0]),
+            input_shape[1] - (output_shape[1] - 1) * (input_shape[1] / output_shape[1])
+        },
+        // stride_shape
+        {
+            input_shape[0] / output_shape[0],
+            input_shape[1] / output_shape[1]
+        },
+        // padding_shape
+        {
+            (input_shape[0] - (output_shape[0] - 1) * (input_shape[0] / output_shape[0]) - 1) / 2,
+            (input_shape[1] - (output_shape[1] - 1) * (input_shape[1] / output_shape[1]) - 1) / 2
+        },
+        backend
+    ) {
     out_shape = output_shape;
+
+    output = CUDANet::Tensor(
+        Shape{out_shape[0] * out_shape[1] * out_shape[2]},
+        CUDANet::DType::FLOAT32, backend
+    );
 }
