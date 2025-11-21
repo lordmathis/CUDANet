@@ -41,7 +41,7 @@ MaxPool2d::MaxPool2d(
     };
 
     output = CUDANet::Tensor(
-        Shape{out_shape[0] * out_shape[1] * out_shape[3]},
+        Shape{out_shape[0] * out_shape[1] * out_shape[2]},
         CUDANet::DType::FLOAT32, backend
     );
 }

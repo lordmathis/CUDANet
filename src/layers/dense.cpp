@@ -30,6 +30,7 @@ Dense::Dense(CUDANet::Shape in_shape, CUDANet::Shape out_shape, CUDANet::Backend
 Dense::~Dense() {}
 
 CUDANet::Tensor& Dense::forward(CUDANet::Tensor& input) {
+    output.zero();
     backend->dense(weights, biases, input, output, in_shape[0], out_shape[0]);
     return output;
 }

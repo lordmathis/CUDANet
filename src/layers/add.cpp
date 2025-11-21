@@ -19,4 +19,10 @@ Add::~Add() {}
 CUDANet::Tensor&
 Add::forward(CUDANet::Tensor& input_a, CUDANet::Tensor& input_b) {
     output.zero();
+    backend->add(
+        input_a,
+        input_b,
+        output
+    );
+    return output;
 }

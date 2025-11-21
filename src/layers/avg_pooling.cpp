@@ -76,7 +76,7 @@ size_t AvgPool2d::input_size() {
 }
 
 size_t AvgPool2d::output_size() {
-    return sizeof(float) * out_shape[0] * out_shape[1] * out_shape[3];
+    return sizeof(float) * out_shape[0] * out_shape[1] * out_shape[2];
 }
 
 void AvgPool2d::set_weights(void* input) {}

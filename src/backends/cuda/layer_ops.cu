@@ -98,7 +98,7 @@ CUDANet::Tensor& CUDA::conv2d(
     dim3 grid(
         (out_shape[0] + block.x - 1) / block.x,
         (out_shape[1] + block.y - 1) / block.y,
-        (out_shape[3] + block.z - 1) / block.z
+        (out_shape[2] + block.z - 1) / block.z
     );
 
     Kernels::convolution<<<grid, block>>>(
@@ -212,6 +212,7 @@ CUDANet::Tensor& CUDA::batch_norm(
         CUDA_CHECK(cudaGetLastError());
     }
     CUDA_CHECK(cudaDeviceSynchronize());
+    return output;
 }
 
 CUDANet::Tensor& CUDA::concat(
