@@ -21,47 +21,31 @@ Conv2d::Conv2d(
       padding_shape(padding_shape),
       backend(backend) {
     if (in_shape.size() != 3) {
-        throw std::runtime_error(
-            std::format(
-                "Invalid input shape. Expected 3 dims, got {}", in_shape.size()
-            )
-        );
+        throw InvalidShapeException("input", 3, in_shape.size());
     }
 
     if (kernel_shape.size() != 3) {
-        throw std::runtime_error(
-            std::format(
-                "Invalid kernel shape. Expected 3 dims, got {}", kernel_shape.size()
-            )
-        );
+        throw InvalidShapeException("kernel", 3, kernel_shape.size());
     }
 
     if (stride_shape.size() != 2) {
-        throw std::runtime_error(
-            std::format(
-                "Invalid stride shape. Expected 2 dims, got {}", stride_shape.size()
-            )
-        );
+        throw InvalidShapeException("stride", 3, stride_shape.size());
     }
 
     if (padding_shape.size() != 2) {
-        throw std::runtime_error(
-            std::format(
-                "Invalid padding shape. Expected 2 dims, got {}", padding_shape.size()
-            )
-        );
+        throw InvalidShapeException("padding", 3, padding_shape.size());
     }
 
-    size_t out_h = (in_shape[0] - kernel_shape[0] + 2 * padding_shape[0]) /
-                       stride_shape[0] +
-                   1;
-    size_t out_w = (in_shape[1] - kernel_shape[1] + 2 * padding_shape[1]) /
-                       stride_shape[1] +
-                   1;
-    out_shape.resize(3);
-    out_shape[0] = out_h;
-    out_shape[1] = out_w;
-    out_shape[2] = kernel_shape[2];
+    out_shape = {
+        (in_shape[0] - kernel_shape[0] + 2 * padding_shape[0]) /
+                stride_shape[0] +
+            1,
+        (in_shape[1] - kernel_shape[1] + 2 * padding_shape[1]) /
+                stride_shape[1] +
+            1,
+        kernel_shape[2]
+    };
+
     output = CUDANet::Tensor(
         Shape{out_shape[0] * out_shape[1] * out_shape[3]},
         CUDANet::DType::FLOAT32, backend
@@ -69,7 +53,7 @@ Conv2d::Conv2d(
 
     weights = CUDANet::Tensor(
         Shape{
-            kernel_shape[0] * kernel_shape[1] * kernel_shape[2] * in_shape[2]
+            kernel_shape[0], kernel_shape[1], kernel_shape[2], in_shape[2]
         },
         CUDANet::DType::FLOAT32, backend
     );
@@ -83,18 +67,11 @@ Conv2d::Conv2d(
 
 Conv2d::~Conv2d() {}
 
-CUDANet::Tensor& Conv2d::forward( CUDANet::Tensor& input) {
+CUDANet::Tensor& Conv2d::forward(CUDANet::Tensor& input) {
     output.zero();
     backend->conv2d(
-        weights,
-        biases,
-        input,
-        output,
-        in_shape,
-        padding_shape,
-        kernel_shape,
-        stride_shape,
-        out_shape
+        weights, biases, input, output, in_shape, padding_shape, kernel_shape,
+        stride_shape, out_shape
     );
     return output;
 }

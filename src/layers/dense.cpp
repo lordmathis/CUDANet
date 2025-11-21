@@ -5,26 +5,22 @@
 
 using namespace CUDANet::Layers;
 
-Dense::Dense(CUDANet::Shape in, CUDANet::Shape out, CUDANet::Backend* backend)
+Dense::Dense(CUDANet::Shape in_shape, CUDANet::Shape out_shape, CUDANet::Backend* backend)
     : backend(backend),
-      in_shape(in),
-      out_shape(out) {
+      in_shape(in_shape),
+      out_shape(out_shape) {
 
-    if (in.size() != 1) {
-        throw std::runtime_error(
-            std::format("Invalid shape. Expected [1], got {}", in_shape)
-        );
+    if (in_shape.size() != 1) {
+        throw InvalidShapeException("input", 1, in_shape.size());
     }
 
-    if (out.size() != 1) {
-        throw std::runtime_error(
-            std::format("Invalid shape. Expected [1], got {}", out_shape)
-        );
+    if (out_shape.size() != 1) {
+        throw InvalidShapeException("output", 1, out_shape.size());
     }
 
-    weights = CUDANet::Tensor(Shape{in[0] * out[0]}, CUDANet::DType::FLOAT32, backend);
-    biases = CUDANet::Tensor(Shape{out[0]}, CUDANet::DType::FLOAT32, backend);
-    output = CUDANet::Tensor(Shape{out[0]}, CUDANet::DType::FLOAT32, backend);
+    weights = CUDANet::Tensor(Shape{out_shape[0], in_shape[0]}, CUDANet::DType::FLOAT32, backend);
+    biases = CUDANet::Tensor(Shape{out_shape[0]}, CUDANet::DType::FLOAT32, backend);
+    output = CUDANet::Tensor(Shape{out_shape[0]}, CUDANet::DType::FLOAT32, backend);
 
     weights.zero();
     biases.zero();

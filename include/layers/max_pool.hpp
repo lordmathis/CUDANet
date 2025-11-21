@@ -8,7 +8,7 @@ class MaxPool2d : public Layer {
   public:
     MaxPool2d(
         CUDANet::Shape        input_shape,
-        CUDANet::Shape        pooling_shape,
+        CUDANet::Shape        pool_shape,
         CUDANet::Shape        stride_shape,
         CUDANet::Shape        padding_shape,
         CUDANet::Backend* backend
@@ -38,7 +38,7 @@ class MaxPool2d : public Layer {
   private:
     CUDANet::Shape in_shape;
 
-    CUDANet::Shape pooling_shape;
+    CUDANet::Shape pool_shape;
     CUDANet::Shape stride_shape;
     CUDANet::Shape padding_shape;
 
