@@ -14,6 +14,7 @@ class CUDA : public Backend {
     // Tensor ops
     void print(const CUDANet::Tensor& input) override;
     void zero(CUDANet::Tensor& input) override;
+    void fill(CUDANet::Tensor &input, int value) override;
     void
     copy_to_device(CUDANet::Tensor& tensor, void* data, size_t size) override;
     void sum(const CUDANet::Tensor& input, CUDANet::Tensor& sum) override;
@@ -49,7 +50,7 @@ class CUDA : public Backend {
         const CUDANet::Shape out_shape
     ) override;
 
-    CUDANet::Tensor& maxPool2d(
+    CUDANet::Tensor& max_pool2d(
         const CUDANet::Tensor& input,
         CUDANet::Tensor& output,
         CUDANet::Shape input_shape,
@@ -59,7 +60,7 @@ class CUDA : public Backend {
         CUDANet::Shape output_shape
     ) override;
 
-    CUDANet::Tensor& avgPool2d(
+    CUDANet::Tensor& avg_pool2d(
         const CUDANet::Tensor& input,
         CUDANet::Tensor& output,
         CUDANet::Shape input_shape,
@@ -67,7 +68,18 @@ class CUDA : public Backend {
         CUDANet::Shape stride_shape,
         CUDANet::Shape padding_shape,
         CUDANet::Shape output_shape
-    ) = 0;
+    ) override;
+
+    CUDANet::Tensor& batch_norm(
+        const CUDANet::Tensor& input,
+        CUDANet::Tensor& output,
+        CUDANet::Shape input_shape,
+        CUDANet::Tensor& weights,
+        CUDANet::Tensor& biases,
+        CUDANet::Tensor& running_mean,
+        CUDANet::Tensor& running_var,
+        CUDANet::Tensor& epsilon
+    ) override;
 };
 
 }  // namespace CUDANet::Backend

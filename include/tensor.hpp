@@ -46,6 +46,11 @@ public:
     void zero();
 
     template <typename T>
+    void fill(T value) {
+        backend->fill(*this, value);
+    }
+
+    template <typename T>
     void set_data(T *data) {
         backend->copy_to_device(*this, data, total_size);
     }

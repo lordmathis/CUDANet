@@ -50,7 +50,7 @@ MaxPool2d::~MaxPool2d() {}
 
 CUDANet::Tensor& MaxPool2d::forward(CUDANet::Tensor& input) {
     output.zero();
-    backend->maxPool2d(
+    backend->max_pool2d(
         input, output, in_shape, pool_shape, stride_shape, padding_shape,
         out_shape
     );

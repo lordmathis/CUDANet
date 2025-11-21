@@ -51,7 +51,7 @@ AvgPool2d::~AvgPool2d() {}
 
 CUDANet::Tensor& AvgPool2d::forward(CUDANet::Tensor& input) {
     output.zero();
-    backend->avgPool2d(
+    backend->avg_pool2d(
         input,
         output,
         in_shape,

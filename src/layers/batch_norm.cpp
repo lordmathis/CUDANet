@@ -9,125 +9,95 @@
 using namespace CUDANet::Layers;
 
 BatchNorm2d::BatchNorm2d(
-    shape2d        inputSize,
-    int            inputChannels,
-    float          epsilon,
-    ActivationType activationType
+    CUDANet::Shape input_shape,
+    float          eps,
+    CUDANet::Backend *backend
 )
-    : inputSize(inputSize), inputChannels(inputChannels), epsilon(epsilon) {
-    activation = new Activation(
-        activationType, inputSize.first * inputSize.second * inputChannels
+    : in_shape(input_shape), backend(backend)  {
+
+    if (in_shape.size() != 3) {
+        throw InvalidShapeException("input", 3, in_shape.size());
+    }
+
+    epsilon = CUDANet::Tensor({1}, CUDANet::DType::FLOAT32, backend);
+    epsilon.set_data<float>(&eps);
+
+    running_mean = CUDANet::Tensor({in_shape[2]}, CUDANet::DType::FLOAT32, backend);
+    running_mean.zero();
+
+    running_var = CUDANet::Tensor({in_shape[2]}, CUDANet::DType::FLOAT32, backend);
+    running_var.fill(1);
+
+    weights = CUDANet::Tensor({in_shape[2]}, CUDANet::DType::FLOAT32, backend);
+    weights.fill(1);
+
+    biases = CUDANet::Tensor({in_shape[2]}, CUDANet::DType::FLOAT32, backend);
+    biases.zero();
+
+    output = CUDANet::Tensor(in_shape, CUDANet::DType::FLOAT32, backend);
+}
+
+BatchNorm2d::~BatchNorm2d() {}
+
+CUDANet::Tensor& BatchNorm2d::forward(CUDANet::Tensor& input) {
+    output.zero();
+    backend->batch_norm(
+        input,
+        output,
+        in_shape,
+        weights,
+        biases,
+        running_mean,
+        running_var,
+        epsilon
     );
-
-    weights.resize(inputChannels);
-    biases.resize(inputChannels);
-
-    running_mean.resize(inputChannels);
-    running_var.resize(inputChannels);
-
-    initializeWeights();
-    initializeBiases();
-    initializeRunningMean();
-    initializeRunningVar();
-
-#ifdef USE_CUDA
-    initCUDA();
-    toCuda();
-#endif
+    return output;
 }
 
-BatchNorm2d::~BatchNorm2d() {
-#ifdef USE_CUDA
-    delCUDA();
-#endif
+CUDANet::Shape BatchNorm2d::input_shape() {
+    return in_shape;
 }
 
-void BatchNorm2d::initializeWeights() {
-    std::fill(weights.begin(), weights.end(), 1.0f);
+CUDANet::Shape BatchNorm2d::output_shape() {
+    return in_shape;
 }
 
-void BatchNorm2d::initializeBiases() {
-    std::fill(biases.begin(), biases.end(), 0.0f);
+size_t BatchNorm2d::input_size() {
+    return sizeof(float) * in_shape[0] * in_shape[1] * in_shape[2];
 }
 
-void BatchNorm2d::initializeRunningMean() {
-    std::fill(running_mean.begin(), running_mean.end(), 0.0f);
+size_t BatchNorm2d::output_size() {
+    return sizeof(float) * in_shape[0] * in_shape[1] * in_shape[2];
 }
 
-void BatchNorm2d::initializeRunningVar() {
-    std::fill(running_var.begin(), running_var.end(), 1.0f);
+void BatchNorm2d::set_weights(void* input) {
+    weights.set_data<float>(static_cast<float*>(input));
 }
 
-void BatchNorm2d::setWeights(const float* weights_input) {
-    std::copy(weights_input, weights_input + weights.size(), weights.begin());
-#ifdef USE_CUDA
-    toCuda();
-#endif
-}
-
-std::vector<float> BatchNorm2d::getWeights() {
+CUDANet::Tensor& BatchNorm2d::get_weights() {
     return weights;
 }
 
-void BatchNorm2d::setBiases(const float* biases_input) {
-    std::copy(biases_input, biases_input + biases.size(), biases.begin());
-#ifdef USE_CUDA
-    toCuda();
-#endif
+void BatchNorm2d::set_biases(void* input) {
+    biases.set_data<float>(static_cast<float*>(input));
 }
 
-std::vector<float> BatchNorm2d::getBiases() {
+CUDANet::Tensor& BatchNorm2d::get_biases() {
     return biases;
 }
 
-void BatchNorm2d::setRunningMean(const float* running_mean_input) {
-    std::copy(
-        running_mean_input, running_mean_input + inputChannels,
-        running_mean.begin()
-    );
-#ifdef USE_CUDA
-    toCuda();
-#endif
+void BatchNorm2d::set_running_mean(void* input) {
+    running_mean.set_data<float>(static_cast<float*>(input));
 }
 
-std::vector<float> BatchNorm2d::getRunningMean() {
+CUDANet::Tensor& BatchNorm2d::get_running_mean() {
     return running_mean;
 }
 
-void BatchNorm2d::setRunningVar(const float* running_var_input) {
-    std::copy(
-        running_var_input, running_var_input + inputChannels,
-        running_var.begin()
-    );
-#ifdef USE_CUDA
-    toCuda();
-#endif
+void BatchNorm2d::set_running_var(void* input) {
+    running_var.set_data<float>(static_cast<float*>(input));
 }
 
-std::vector<float> BatchNorm2d::getRunningVar() {
+CUDANet::Tensor& BatchNorm2d::get_running_var() {
     return running_var;
-}
-
-int BatchNorm2d::getInputSize() {
-    return inputSize.first * inputSize.second * inputChannels;
-}
-
-int BatchNorm2d::getOutputSize() {
-    return inputSize.first * inputSize.second * inputChannels;
-}
-
-shape2d BatchNorm2d::getOutputDims() {
-    return inputSize;
-}
-
-float* BatchNorm2d::forwardCPU(const float* input) {
-    throw std::logic_error("Not implemented");
-}
-
-float* BatchNorm2d::forward(const float* input) {
-#ifdef USE_CUDA
-    return forwardCUDA(input);
-#else
-    return forwardCPU(input);
-#endif
 }

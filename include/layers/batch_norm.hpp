@@ -1,170 +1,54 @@
-#ifndef CUDANET_BATCH_NORM_H
-#define CUDANET_BATCH_NORM_H
+#pragma once
 
-#include <vector>
-
-#include "activation.hpp"
 #include "layer.hpp"
 
 namespace CUDANet::Layers {
 
-class BatchNorm2d : public WeightedLayer, public TwoDLayer {
+class BatchNorm2d : public Layer {
   public:
-    BatchNorm2d(
-        shape2d        inputSize,
-        int            inputChannels,
-        float          epsilon,
-        ActivationType activationType
-    );
+    BatchNorm2d(CUDANet::Shape input_shape, float epsilon, CUDANet::Backend *backend);
 
     ~BatchNorm2d();
 
-    /**
-     * @brief Compute the forward pass of the batchnorm layer
-     *
-     * @param d_input Device pointer to the input
-     * @return float* Device pointer to the output
-     */
-    float* forward(const float* d_input);
+    CUDANet::Tensor& forward(CUDANet::Tensor& input) override;
 
-    /**
-     * @brief Set the weights of the batchnorm layer
-     *
-     * @param weights_input Pointer to the weights
-     */
-    void setWeights(const float* weights_input);
+    CUDANet::Shape input_shape() override;
 
-    /**
-     * @brief Get the weights of the batchnorm layer
-     *
-     * @return std::vector<float>
-     */
-    std::vector<float> getWeights();
+    CUDANet::Shape output_shape() override;
 
-    /**
-     * @brief Set the biases of the batchnorm layer
-     *
-     * @param biases_input Pointer to the biases
-     */
-    void setBiases(const float* biases_input);
+    size_t input_size() override;
 
-    /**
-     * @brief Get the biases of the batchnorm layer
-     *
-     * @return std::vector<float>
-     */
-    std::vector<float> getBiases();
+    size_t output_size() override;
 
-    /**
-     * @brief Set the Running Mean
-     *
-     * @param running_mean_input
-     */
-    void setRunningMean(const float* running_mean_input);
+    void set_weights(void* input) override;
 
-    /**
-     * @brief Get the Running Mean
-     *
-     */
-    std::vector<float> getRunningMean();
+    CUDANet::Tensor& get_weights() override;
 
-    /**
-     * @brief Set the Running Var
-     *
-     * @param running_mean_input
-     */
-    void setRunningVar(const float* running_mean_input);
+    void set_biases(void* input) override;
 
-    /**
-     * @brief Get the Running Var
-     *
-     */
-    std::vector<float> getRunningVar();
+    CUDANet::Tensor& get_biases() override;
 
-    /**
-     * @brief Get output size
-     *
-     * @return int output size
-     */
-    int getOutputSize();
+    void set_running_mean(void* input);
 
-    /**
-     * @brief Get input size
-     *
-     * @return int input size
-     */
-    int getInputSize();
+    CUDANet::Tensor& get_running_mean();
 
-    shape2d getOutputDims();
+    void set_running_var(void* input);
+
+    CUDANet::Tensor& get_running_var();
 
   private:
-    shape2d inputSize;
-    int     inputChannels;
-    float   epsilon;
+    CUDANet::Shape  in_shape;
+    CUDANet::Tensor epsilon;
 
-    int gridSize;
+    CUDANet::Tensor running_mean;
+    CUDANet::Tensor running_var;
 
-#ifdef USE_CUDA
+    CUDANet::Tensor weights;
+    CUDANet::Tensor biases;
 
-    float* d_output;
+    CUDANet::Tensor output;
 
-    float* d_running_mean;
-    float* d_running_var;
-
-    float* d_length;
-    float* d_epsilon;
-
-    float* d_weights;
-    float* d_biases;
-
-    void initCUDA();
-    void delCUDA();
-
-    /**
-     * @brief Copy weights and biases to the device
-     *
-     */
-    void toCuda();
-
-    float* forwardCUDA(const float* d_input);
-
-#endif
-
-    std::vector<float> weights;
-    std::vector<float> biases;
-
-    std::vector<float> running_mean;
-    std::vector<float> running_var;
-
-    Activation* activation;
-
-    float* forwardCPU(const float* input);
-
-    /**
-     * @brief Initialize weights of the batchnorm layer with zeros
-     *
-     */
-    void initializeWeights();
-
-    /**
-     * @brief Initialize biases of the batchnorm layer with zeros
-     *
-     */
-    void initializeBiases();
-
-    /**
-     * @brief Initialize mean of the batchnorm layer with zeros
-     *
-     */
-    void initializeRunningMean();
-
-    /**
-     * @brief Initialize sqrt of variance of the batchnorm layer with ones
-     *
-     */
-    void initializeRunningVar();
+    CUDANet::Backend *backend;
 };
 
 }  // namespace CUDANet::Layers
-
-#endif  // CUDANET_BATCH_NORM_H

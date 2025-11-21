@@ -23,7 +23,12 @@ void CUDA::print(const CUDANet::Tensor &input) {
 }
 
 void CUDA::zero(CUDANet::Tensor &input) {
-    CUDA_CHECK(cudaMemset(input.data<float>(), 0, sizeof(float) * input.numel()));
+    fill(input, 0);
+}
+
+void CUDA::fill(CUDANet::Tensor &input, int value) {
+    CUDA_CHECK(cudaMemset(input.data<float>(), value, sizeof(float) * input.numel()));
+
 }
 
 void CUDA::copy_to_device(CUDANet::Tensor &tensor, void *data, size_t size) {

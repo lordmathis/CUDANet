@@ -16,6 +16,7 @@ class Backend {
     // Tensor ops
     virtual void print(const CUDANet::Tensor& input) = 0;
     virtual void zero(CUDANet::Tensor& input)        = 0;
+    virtual void fill(CUDANet::Tensor& input, int data) = 0;
 
     virtual void
     copy_to_device(CUDANet::Tensor& tensor, void* data, size_t size) = 0;
@@ -53,7 +54,7 @@ class Backend {
         const CUDANet::Shape out_shape
     ) = 0;
 
-    virtual CUDANet::Tensor& maxPool2d(
+    virtual CUDANet::Tensor& max_pool2d(
         const CUDANet::Tensor& input,
         CUDANet::Tensor& output,
         CUDANet::Shape input_shape,
@@ -63,7 +64,7 @@ class Backend {
         CUDANet::Shape output_shape
     ) = 0;
 
-    virtual CUDANet::Tensor& avgPool2d(
+    virtual CUDANet::Tensor& avg_pool2d(
         const CUDANet::Tensor& input,
         CUDANet::Tensor& output,
         CUDANet::Shape input_shape,
@@ -71,6 +72,17 @@ class Backend {
         CUDANet::Shape stride_shape,
         CUDANet::Shape padding_shape,
         CUDANet::Shape output_shape
+    ) = 0;
+
+    virtual CUDANet::Tensor& batch_norm(
+        const CUDANet::Tensor& input,
+        CUDANet::Tensor& output,
+        CUDANet::Shape input_shape,
+        CUDANet::Tensor& weights,
+        CUDANet::Tensor& biases,
+        CUDANet::Tensor& running_mean,
+        CUDANet::Tensor& running_var,
+        CUDANet::Tensor& epsilon
     ) = 0;
 };
 

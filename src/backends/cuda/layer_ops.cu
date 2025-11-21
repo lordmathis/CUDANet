@@ -2,7 +2,7 @@
 #include "kernels/activation_functions.cuh"
 #include "kernels/convolution.cuh"
 #include "kernels/matmul.cuh"
-#include "kernels/pooling.cuh"
+#include "kernels/pool.cuh"
 #include "utils/cuda_helper.cuh"
 
 using namespace CUDANet::Backend;
@@ -112,7 +112,7 @@ CUDANet::Tensor& CUDA::conv2d(
     return output;
 }
 
-CUDANet::Tensor& CUDA::maxPool2d(
+CUDANet::Tensor& CUDA::max_pool2d(
     const CUDANet::Tensor& input,
     CUDANet::Tensor& output,
     CUDANet::Shape input_shape,
@@ -138,7 +138,7 @@ CUDANet::Tensor& CUDA::maxPool2d(
     return output;
 }
 
-CUDANet::Tensor& CUDA::avgPool2d(
+CUDANet::Tensor& CUDA::avg_pool2d(
     const CUDANet::Tensor& input,
     CUDANet::Tensor& output,
     CUDANet::Shape input_shape,
@@ -162,4 +162,53 @@ CUDANet::Tensor& CUDA::avgPool2d(
     CUDA_CHECK(cudaDeviceSynchronize());
 
     return output;
+}
+
+CUDANet::Tensor& CUDA::batch_norm(
+    const CUDANet::Tensor& input,
+    CUDANet::Tensor& output,
+    CUDANet::Shape input_shape,
+    CUDANet::Tensor& weights,
+    CUDANet::Tensor& biases,
+    CUDANet::Tensor& running_mean,
+    CUDANet::Tensor& running_var,
+    CUDANet::Tensor& epsilon
+) {
+    auto gridSize =
+        (input_shape[0] * input_shape[1] + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+
+    for (int i = 0; i < input_shape[2]; i++) {
+        // Subtract mean from input
+        Kernels::vec_scalar_sub<<<gridSize, BLOCK_SIZE>>>(
+            input.data<float>() + i * input_shape[0] * input_shape[1],
+            output.data<float>() + i * input_shape[0] * input_shape[1],
+            &running_mean.data<float>()[i], input_shape[0] * input_shape[1]
+        );
+        CUDA_CHECK(cudaGetLastError());
+
+        // Divide by sqrt(running_var + epsilon)
+        Kernels::vec_scale<<<gridSize, BLOCK_SIZE>>>(
+            output.data<float>() + i * input_shape[0] * input_shape[1],
+            output.data<float>() + i * input_shape[0] * input_shape[1],
+            &running_var.data<float>()[i], epsilon.data<float>(), input_shape[0] * input_shape[1]
+        );
+        CUDA_CHECK(cudaGetLastError());
+
+        // Multiply by weights
+        Kernels::vec_scalar_mul<<<gridSize, BLOCK_SIZE>>>(
+            output.data<float>() + i * input_shape[0] * input_shape[1],
+            output.data<float>() + i * input_shape[0] * input_shape[1], &weights.data<float>()[i],
+            input_shape[0] * input_shape[1]
+        );
+        CUDA_CHECK(cudaGetLastError());
+
+        // Add biases
+        Kernels::vec_scalar_add<<<gridSize, BLOCK_SIZE>>>(
+            output.data<float>() + i * input_shape[0] * input_shape[1],
+            output.data<float>() + i * input_shape[0] * input_shape[1], &biases.data<float>()[i],
+            input_shape[0] * input_shape[1]
+        );
+        CUDA_CHECK(cudaGetLastError());
+    }
 }
