@@ -90,6 +90,12 @@ class Backend {
         CUDANet::Tensor& input_b,
         CUDANet::Tensor& output
     ) = 0;
+
+    virtual CUDANet::Tensor& add(
+        CUDANet::Tensor& input_a,
+        CUDANet::Tensor& input_b,
+        CUDANet::Tensor& output
+    ) = 0;
 };
 
 }  // namespace CUDANet

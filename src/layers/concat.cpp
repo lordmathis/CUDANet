@@ -6,7 +6,7 @@ Concat::Concat(const CUDANet::Shape a_shape, const CUDANet::Shape b_shape, CUDAN
     : a_shape(a_shape), b_shape(b_shape), backend(backend) {
     if (a_shape[0] != b_shape[0] || a_shape[1] != b_shape[1]) {
         throw InvalidShapeException(
-            "Concat requires matching batch and height dimensions", a_shape,
+            "Concat requires matching height and width dimensions", a_shape,
             b_shape
         );
     }

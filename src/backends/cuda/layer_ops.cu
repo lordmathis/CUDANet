@@ -211,6 +211,7 @@ CUDANet::Tensor& CUDA::batch_norm(
         );
         CUDA_CHECK(cudaGetLastError());
     }
+    CUDA_CHECK(cudaDeviceSynchronize());
 }
 
 CUDANet::Tensor& CUDA::concat(
@@ -228,6 +229,23 @@ CUDANet::Tensor& CUDA::concat(
         cudaMemcpyDeviceToDevice
     ));
 
+    CUDA_CHECK(cudaGetLastError());
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    return output;
+}
+
+CUDANet::Tensor& CUDA::add(
+    CUDANet::Tensor& input_a,
+    CUDANet::Tensor& input_b,
+    CUDANet::Tensor& output
+) {
+    auto gridSize = (input_a.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    Kernels::vec_vec_add<<<gridSize, BLOCK_SIZE>>>(
+        input_a.data<float>(), input_b.data<float>(), output.data<float>(), input_a.numel()
+    );
+    CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
 
     return output;

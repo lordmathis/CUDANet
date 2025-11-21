@@ -86,6 +86,12 @@ class CUDA : public Backend {
         CUDANet::Tensor& input_b,
         CUDANet::Tensor& output
     ) override;
+
+    CUDANet::Tensor& add(
+        CUDANet::Tensor& input_a,
+        CUDANet::Tensor& input_b,
+        CUDANet::Tensor& output
+    ) override;
 };
 
 }  // namespace CUDANet::Backend
