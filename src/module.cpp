@@ -4,29 +4,41 @@
 
 using namespace CUDANet;
 
-void Module::addLayer(const std::string& name, Layers::SequentialLayer* layer) {
-    const Module* module = dynamic_cast<Module*>(layer);
+CUDANet::Shape Module::input_shape() {
+    return in_shape;
+}
 
-    if (module != nullptr) {
-        for (const auto& moduleLayer : module->getLayers()) {
-            layers.push_back({moduleLayer.first, moduleLayer.second});
-        }
+CUDANet::Shape Module::output_shape() {
+    return out_shape;
+}
 
-        return;
+size_t Module::input_size() {
+    size_t count = 1;
+    for (const auto& dim : in_shape) {
+        count *= dim;
     }
+    return sizeof(float) * count;
+}
 
+size_t Module::output_size() {
+    size_t count = 1;
+    for (const auto& dim : out_shape) {
+        count *= dim;
+    }
+    return sizeof(float) * count;
+}
+
+void Module::register_layer(const std::string& name, Layer& layer) {
     layers.push_back({name, layer});
 }
 
-const std::vector<std::pair<std::string, Layers::SequentialLayer*>>&
-Module::getLayers() const {
+void Module::register_module(Module& module) {
+    for (const auto& moduleLayer : module.get_layers()) {
+        layers.push_back({moduleLayer.first, moduleLayer.second});
+    }
+}
+
+const std::vector<std::pair<std::string, Layer&>>&
+Module::get_layers() const {
     return layers;
-}
-
-int Module::getInputSize() {
-    return inputSize;
-}
-
-int Module::getOutputSize() {
-    return outputSize;
 }
