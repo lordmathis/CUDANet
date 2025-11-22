@@ -1,10 +1,20 @@
 #pragma once
 
+#include <format>
 #include <vector>
 
 namespace CUDANet {
 
 typedef std::vector<size_t> Shape;
+
+std::string format_shape(const Shape& shape) {
+    std::string result;
+    for (size_t i = 0; i < shape.size(); ++i) {
+        if (i > 0) result += ", ";
+        result += std::to_string(shape[i]);
+    }
+    return result;
+}
 
 class InvalidShapeException : public std::runtime_error {
   public:
@@ -35,16 +45,6 @@ class InvalidShapeException : public std::runtime_error {
                   format_shape(shape_b)
               )
           ) {}
-
-  private:
-    static std::string format_shape(const Shape& shape) {
-        std::string result;
-        for (size_t i = 0; i < shape.size(); ++i) {
-            if (i > 0) result += ", ";
-            result += std::to_string(shape[i]);
-        }
-        return result;
-    }
 };
 
 }  // namespace CUDANet

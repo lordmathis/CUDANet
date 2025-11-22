@@ -2,7 +2,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cuda_helper.cuh>
 
 #include "backend/cuda.cuh"
 

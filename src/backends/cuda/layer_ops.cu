@@ -3,7 +3,6 @@
 #include "kernels/convolution.cuh"
 #include "kernels/matmul.cuh"
 #include "kernels/pool.cuh"
-#include "utils/cuda_helper.cuh"
 
 using namespace CUDANet::Backend;
 

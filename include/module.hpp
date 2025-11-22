@@ -19,14 +19,14 @@ class Module {
 
     size_t output_size();
 
-    void register_layer(const std::string& name, Layer& layer);
+    void register_layer(const std::string& name, Layer* layer);
 
     void register_module(Module& module);
 
-    const std::vector<std::pair<std::string, Layer&>>& get_layers() const;
+    const std::vector<std::pair<std::string, Layer*>>& get_layers() const;
 
   protected:
-    std::vector<std::pair<std::string, Layer&>> layers;
+    std::vector<std::pair<std::string, Layer*>> layers;
 
     CUDANet::Shape in_shape;
     CUDANet::Shape out_shape;

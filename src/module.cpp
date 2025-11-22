@@ -28,7 +28,7 @@ size_t Module::output_size() {
     return sizeof(float) * count;
 }
 
-void Module::register_layer(const std::string& name, Layer& layer) {
+void Module::register_layer(const std::string& name, Layer* layer) {
     layers.push_back({name, layer});
 }
 
@@ -38,7 +38,7 @@ void Module::register_module(Module& module) {
     }
 }
 
-const std::vector<std::pair<std::string, Layer&>>&
+const std::vector<std::pair<std::string, Layer*>>&
 Module::get_layers() const {
     return layers;
 }

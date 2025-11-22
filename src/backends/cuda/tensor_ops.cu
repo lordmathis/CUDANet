@@ -2,7 +2,6 @@
 
 #include "backend.hpp"
 #include "backend/cuda.cuh"
-#include "utils/cuda_helper.cuh"
 #include "kernels/matmul.cuh"
 
 using namespace CUDANet::Backend;
