@@ -1,4 +1,3 @@
-#include "cuda_helper.cuh"
 #include "layer.hpp"
 #include "pool.cuh"
 
