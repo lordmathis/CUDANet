@@ -1,5 +1,5 @@
-#include "backend/cuda.cuh"
-#include "matmul.cuh"
+#include "backend/cuda/cuda.cuh"
+#include "backend/cuda/kernels/matmul.cuh"
 
 using namespace CUDANet;
 

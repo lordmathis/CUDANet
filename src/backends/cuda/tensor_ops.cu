@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "backend.hpp"
-#include "backend/cuda.cuh"
-#include "kernels/matmul.cuh"
+#include "backend/cuda/cuda.cuh"
+#include "backend/cuda/kernels/matmul.cuh"
 
 using namespace CUDANet::Backends;
 

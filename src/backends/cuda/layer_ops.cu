@@ -1,8 +1,8 @@
-#include "backend/cuda.cuh"
-#include "kernels/activation_functions.cuh"
-#include "kernels/convolution.cuh"
-#include "kernels/matmul.cuh"
-#include "kernels/pool.cuh"
+#include "backend/cuda/cuda.cuh"
+#include "backend/cuda/kernels/activation_functions.cuh"
+#include "backend/cuda/kernels/convolution.cuh"
+#include "backend/cuda/kernels/matmul.cuh"
+#include "backend/cuda/kernels/pool.cuh"
 
 using namespace CUDANet::Backends;
 

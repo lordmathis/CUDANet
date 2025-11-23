@@ -1,4 +1,4 @@
-#include "activation_functions.cuh"
+#include "backend/cuda/kernels/activation_functions.cuh"
 
 using namespace CUDANet;
 

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "convolution.cuh"
+#include "backend/cuda/kernels/convolution.cuh"
 
 using namespace CUDANet;
 
@@ -39,7 +39,7 @@ __global__ void Kernels::convolution(
                     continue;
                 }
 
-                int kernelIndex =
+                int kernel_idx =
                     f * kernel_shape[0] * kernel_shape[1] * input_shape[2] +
                     c * kernel_shape[0] * kernel_shape[1] +
                     k * kernel_shape[1] + l;
@@ -48,7 +48,7 @@ __global__ void Kernels::convolution(
                                      input_shape[1] +
                                  (j * stride_shape[1] + l - padding_shape[1]);
 
-                sum += d_kernel[kernelIndex] * d_input[inputIndex];
+                sum += d_kernel[kernel_idx] * d_input[inputIndex];
             }
         }
     }

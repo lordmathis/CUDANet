@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "backend/cuda.cuh"
+#include "backend/cuda/cuda.cuh"
 
 cudaDeviceProp initializeCUDA() {
     int deviceCount;

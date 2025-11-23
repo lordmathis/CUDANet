@@ -1,5 +1,5 @@
 #include "layer.hpp"
-#include "pool.cuh"
+#include "backend/cuda/kernels/pool.cuh"
 
 using namespace CUDANet;
 
