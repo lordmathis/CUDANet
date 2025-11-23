@@ -7,11 +7,11 @@
 
 using namespace CUDANet::Layers;
 
-Activation::Activation(CUDANet::Backend* backend, ActivationType activation, const CUDANet::Shape &shape)
+Activation::Activation(ActivationType activation, const CUDANet::Shape &shape, CUDANet::Backend* backend)
     : backend(backend), activationType(activation), shape(shape) {
 
     if (shape.size() != 1) {
-        throw std::runtime_error(std::format("Invalid shape. Expected [1], got {}", shape));
+        throw InvalidShapeException("input", 1, shape.size());
     }
 
     auto length = shape[0];

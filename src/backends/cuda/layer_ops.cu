@@ -4,7 +4,7 @@
 #include "kernels/matmul.cuh"
 #include "kernels/pool.cuh"
 
-using namespace CUDANet::Backend;
+using namespace CUDANet::Backends;
 
 void CUDA::relu(Tensor& tensor) {
     int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;

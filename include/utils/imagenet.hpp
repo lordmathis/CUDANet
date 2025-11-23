@@ -1,5 +1,4 @@
-#ifndef CUDANET_IMAGENET_H
-#define CUDANET_IMAGENET_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -1012,5 +1011,3 @@ const std::map <int, std::string> IMAGENET_CLASS_MAP = {
 // clang-format on
 
 }
-
-#endif // CUDANET_IMAGENET_H

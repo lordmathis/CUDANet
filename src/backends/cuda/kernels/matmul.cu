@@ -1,4 +1,4 @@
-#include "cuda_helper.cuh"
+#include "backend/cuda.cuh"
 #include "matmul.cuh"
 
 using namespace CUDANet;

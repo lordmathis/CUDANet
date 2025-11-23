@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+#include "shape.hpp"
+
 namespace CUDANet {
 
 // Forward declaration

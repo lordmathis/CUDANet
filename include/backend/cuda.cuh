@@ -24,7 +24,7 @@ do { \
     } \
 } while (0)
 
-namespace CUDANet::Backend {
+namespace CUDANet::Backends {
 
 class CUDA : public Backend {
   public:

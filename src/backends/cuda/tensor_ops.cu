@@ -4,7 +4,7 @@
 #include "backend/cuda.cuh"
 #include "kernels/matmul.cuh"
 
-using namespace CUDANet::Backend;
+using namespace CUDANet::Backends;
 
 void CUDA::print(const CUDANet::Tensor &input) {
     auto length = input.numel();

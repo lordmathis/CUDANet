@@ -18,7 +18,7 @@ class Conv2d : public Layer {
         CUDANet::Backend* backend
     );
 
-    ~Conv2d() {};
+    ~Conv2d();
 
     CUDANet::Tensor& forward(CUDANet::Tensor& input) override;
 

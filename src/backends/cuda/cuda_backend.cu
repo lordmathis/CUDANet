@@ -25,7 +25,7 @@ cudaDeviceProp initializeCUDA() {
     return deviceProp;
 }
 
-using namespace CUDANet::Backend;
+using namespace CUDANet::Backends;
 
 void* CUDA::allocate(size_t bytes) {
     void* d_ptr = nullptr;

@@ -3,7 +3,7 @@
 #include "backend.hpp"
 #include "tensor.hpp"
 
-namespace CUDANet::Backend {
+namespace CUDANet::Backends {
 
 class CPU : public Backend {
 public:

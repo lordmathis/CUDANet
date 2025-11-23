@@ -1,5 +1,4 @@
-#ifndef CUDANET_MATMUL_H
-#define CUDANET_MATMUL_H
+#pragma once
 
 #include <cuda_runtime.h>
 
@@ -191,5 +190,3 @@ __global__ void sum_reduce(
 );
 
 }  // namespace CUDANet::Kernels
-
-#endif  // CUDANET_MATMUL_H

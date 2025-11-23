@@ -1,5 +1,4 @@
-#ifndef CUDANET_ACTIVATION_FUNCTIONS_H
-#define CUDANET_ACTIVATION_FUNCTIONS_H
+#pragma once
 
 #include <cuda_runtime.h>
 
@@ -32,5 +31,3 @@ __global__ void relu(
 );
 
 }  // namespace CUDANet::Kernels
-
-#endif  // CUDANET_ACTIVATION_FUNCTIONS_H

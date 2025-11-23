@@ -1,5 +1,4 @@
 #include "activation_functions.cuh"
-#include "cuda_helper.cuh"
 
 using namespace CUDANet;
 

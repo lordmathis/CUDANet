@@ -25,7 +25,7 @@ class Activation : public Layer {
 
     Activation() = default;
 
-    Activation(CUDANet::Backend* backend, ActivationType activation, const CUDANet::Shape &shape);
+    Activation(ActivationType activation, const CUDANet::Shape &shape, CUDANet::Backend* backend);
 
     ~Activation() = default;
 
