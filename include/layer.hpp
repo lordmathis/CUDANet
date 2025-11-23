@@ -32,11 +32,11 @@ class Layer {
 
     virtual void set_weights(void *input) = 0;
 
-    virtual CUDANet::Tensor& get_weights() = 0;
+    virtual size_t get_weights_size() = 0;
 
     virtual void set_biases(void *input) = 0;
 
-    virtual CUDANet::Tensor& get_biases() = 0;
+    virtual size_t get_biases_size() = 0;
 };
 
 }  // namespace CUDANet::Layers

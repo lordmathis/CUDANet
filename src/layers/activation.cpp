@@ -59,8 +59,12 @@ size_t Activation::output_size() {
 
 void Activation::set_weights(void *input) {}
 
-CUDANet::Tensor& Activation::get_weights() {}
+size_t Activation::get_weights_size() {
+    return 0;
+}
 
 void Activation::set_biases(void *input) {}
 
-CUDANet::Tensor& Activation::get_biases() {}
+size_t Activation::get_biases_size() {
+    return 0;
+}

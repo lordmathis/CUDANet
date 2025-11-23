@@ -81,11 +81,15 @@ size_t AvgPool2d::output_size() {
 
 void AvgPool2d::set_weights(void* input) {}
 
-CUDANet::Tensor& AvgPool2d::get_weights() {}
+size_t AvgPool2d::get_weights_size() {
+    return 0;
+}
 
 void AvgPool2d::set_biases(void* input) {}
 
-CUDANet::Tensor& AvgPool2d::get_biases() {}
+size_t AvgPool2d::get_biases_size() {
+    return 0;
+}
 
 
 AdaptiveAvgPool2d::AdaptiveAvgPool2d(

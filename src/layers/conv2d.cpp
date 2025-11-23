@@ -96,16 +96,16 @@ void Conv2d::set_weights(void* input) {
     weights.set_data<float>(static_cast<float*>(input));
 }
 
-CUDANet::Tensor& Conv2d::get_weights() {
-    return weights;
+size_t Conv2d::get_weights_size() {
+    return weights.size();
 }
 
 void Conv2d::set_biases(void* input) {
     biases.set_data<float>(static_cast<float*>(input));
 }
 
-CUDANet::Tensor& Conv2d::get_biases() {
-    return biases;
+size_t Conv2d::get_biases_size() {
+    return biases.size();
 }
 
 CUDANet::Shape Conv2d::get_padding_shape() {

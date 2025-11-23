@@ -74,16 +74,16 @@ void BatchNorm2d::set_weights(void* input) {
     weights.set_data<float>(static_cast<float*>(input));
 }
 
-CUDANet::Tensor& BatchNorm2d::get_weights() {
-    return weights;
+size_t BatchNorm2d::get_weights_size() {
+    return weights.size();
 }
 
 void BatchNorm2d::set_biases(void* input) {
     biases.set_data<float>(static_cast<float*>(input));
 }
 
-CUDANet::Tensor& BatchNorm2d::get_biases() {
-    return biases;
+size_t BatchNorm2d::get_biases_size() {
+    return biases.size();
 }
 
 void BatchNorm2d::set_running_mean(void* input) {

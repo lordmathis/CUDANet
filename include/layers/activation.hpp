@@ -41,11 +41,11 @@ class Activation : public Layer {
 
     void set_weights(void *input) override;
 
-    CUDANet::Tensor& get_weights() override;
+    size_t get_weights_size() override;
 
     void set_biases(void *input) override;
 
-    CUDANet::Tensor& get_biases() override;
+    size_t get_biases_size() override;
 
 
   private:

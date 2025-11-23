@@ -55,14 +55,14 @@ void Dense::set_weights(void* input) {
     weights.set_data<float>(static_cast<float*>(input));
 }
 
-CUDANet::Tensor& Dense::get_weights() {
-    return weights;
+size_t Dense::get_weights_size() {
+    return weights.size();
 }
 
 void Dense::set_biases(void* input) {
     biases.set_data<float>(static_cast<float*>(input));
 }
 
-CUDANet::Tensor& Dense::get_biases() {
-    return biases;
+size_t Dense::get_biases_size() {
+    return biases.size();
 }

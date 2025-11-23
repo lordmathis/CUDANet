@@ -75,8 +75,12 @@ size_t MaxPool2d::output_size() {
 
 void MaxPool2d::set_weights(void* input) {}
 
-CUDANet::Tensor& MaxPool2d::get_weights() {}
+size_t MaxPool2d::get_weights_size() {
+    return 0;
+}
 
 void MaxPool2d::set_biases(void* input) {}
 
-CUDANet::Tensor& MaxPool2d::get_biases() {}
+size_t MaxPool2d::get_biases_size() {
+    return 0;
+}

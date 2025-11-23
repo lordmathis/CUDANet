@@ -128,20 +128,20 @@ void Model::load_weights(const std::string& path) {
             Layer* layer = layer_map[tensor_info.name];
 
             if (tensor_info.type == TensorType::WEIGHT) {
-                if (layer->get_weights().size() != values.size()) {
+                if (layer->get_weights_size() != values.size()) {
                     std::cerr << "Layer: " << tensor_info.name
                               << " has incorrect number of weights, expected "
-                              << layer->get_weights().size() << " but got "
+                              << layer->get_weights_size() << " but got "
                               << values.size() << ", skipping" << std::endl;
                     continue;
                 }
 
                 layer->set_weights(values.data());
             } else if (tensor_info.type == TensorType::BIAS) {
-                if (layer->get_biases().size() != values.size()) {
+                if (layer->get_biases_size() != values.size()) {
                     std::cerr << "Layer: " << tensor_info.name
                               << " has incorrect number of biases, expected "
-                              << layer->get_biases().size() << " but got "
+                              << layer->get_biases_size() << " but got "
                               << values.size() << ", skipping" << std::endl;
                     continue;
                 }
