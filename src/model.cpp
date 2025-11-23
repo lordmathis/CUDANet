@@ -155,16 +155,16 @@ void Model::load_weights(const std::string& path) {
             }
 
             if (tensor_info.type == TensorType::RUNNING_MEAN) {
-                if (bn_layer->get_running_mean().size() != values.size()) {
+                if (bn_layer->get_running_mean_size() != values.size()) {
                     std::cerr << "Layer: " << tensor_info.name << " has incorrect number of running mean values, expected "
-                                << bn_layer->get_running_mean().size() << " but got " << values.size() << ", skipping" << std::endl;
+                                << bn_layer->get_running_mean_size() << " but got " << values.size() << ", skipping" << std::endl;
                     continue;
                 }
                 bn_layer->set_running_mean(values.data());
             } else if (tensor_info.type == TensorType::RUNNING_VAR) {
-                if (bn_layer->get_running_var().size() != values.size()) {
+                if (bn_layer->get_running_var_size() != values.size()) {
                     std::cerr << "Layer: " << tensor_info.name << " has incorrect number of running var values, expected "
-                                << bn_layer->get_running_var().size() << " but got " << values.size() << ", skipping" << std::endl;
+                                << bn_layer->get_running_var_size() << " but got " << values.size() << ", skipping" << std::endl;
                     continue;
                 }
                 bn_layer->set_running_var(values.data());

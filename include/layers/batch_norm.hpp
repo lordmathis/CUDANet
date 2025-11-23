@@ -30,11 +30,11 @@ class BatchNorm2d : public Layer {
 
     void set_running_mean(void* input);
 
-    CUDANet::Tensor& get_running_mean();
+    size_t get_running_mean_size();
 
     void set_running_var(void* input);
 
-    CUDANet::Tensor& get_running_var();
+    size_t get_running_var_size();
 
   private:
     CUDANet::Shape  in_shape;

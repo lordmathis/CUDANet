@@ -90,14 +90,14 @@ void BatchNorm2d::set_running_mean(void* input) {
     running_mean.set_data<float>(static_cast<float*>(input));
 }
 
-CUDANet::Tensor& BatchNorm2d::get_running_mean() {
-    return running_mean;
+size_t BatchNorm2d::get_running_mean_size() {
+    return running_mean.size();
 }
 
 void BatchNorm2d::set_running_var(void* input) {
     running_var.set_data<float>(static_cast<float*>(input));
 }
 
-CUDANet::Tensor& BatchNorm2d::get_running_var() {
-    return running_var;
+size_t BatchNorm2d::get_running_var_size() {
+    return running_var.size();
 }
