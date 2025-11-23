@@ -1,35 +1,55 @@
-#ifndef CUDANET_H
-#define CUDANET_H
+#pragma once
 
-#ifdef USE_CUDA
-#include "activation_functions.cuh"
-#include "convolution.cuh"
-#include "matmul.cuh"
-#include "pooling.cuh"
-#endif
+// ============================================================================
+// Core Data Structures & Abstractions (BACKEND-INDEPENDENT)
+// ============================================================================
 
-// Layers
-#include "activation.hpp"
-#include "add.hpp"
-#include "avg_pooling.hpp"
-#include "batch_norm.hpp"
-#include "concat.hpp"
-#include "conv2d.hpp"
-#include "dense.hpp"
-#include "input.hpp"
+#include "shape.hpp"
+#include "backend.hpp"
+#include "tensor.hpp"
 #include "layer.hpp"
-#include "max_pooling.hpp"
-#include "output.hpp"
 
-// Models
-#include "model.hpp"
+// ============================================================================
+// Container Classes
+// ============================================================================
+
 #include "module.hpp"
+#include "model.hpp"
 
-// Utils
-#include "imagenet.hpp"
+// ============================================================================
+// Layer Implementations
+// ============================================================================
+
+// Activation
+#include "layers/activation.hpp"
+
+// Normalization
+#include "layers/batch_norm.hpp"
+
+// Linear
+#include "layers/dense.hpp"
+
+// Convolutional
+#include "layers/conv2d.hpp"
+
+// Pooling
+#include "layers/max_pool.hpp"
+#include "layers/avg_pool.hpp"
+
+// Composition (element-wise operations)
+#include "layers/add.hpp"
+#include "layers/concat.hpp"
+
+// ============================================================================
+// Utilities
+// ============================================================================
+
+#include "utils/imagenet.hpp"
+
+// ============================================================================
+// Backend-Specific Includes (conditionally compiled)
+// ============================================================================
+
 #ifdef USE_CUDA
-#include "cuda_helper.cuh"
-#include "vector.cuh"
+#include "backend/cuda/cuda_backend.cuh"
 #endif
-
-#endif  // CUDANET_H
