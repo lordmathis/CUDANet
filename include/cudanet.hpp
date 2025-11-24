@@ -41,15 +41,15 @@
 #include "layers/concat.hpp"
 
 // ============================================================================
-// Utilities
+// Dataset Labels
 // ============================================================================
 
-#include "utils/imagenet.hpp"
+#include "datasets/imagenet.hpp"
 
 // ============================================================================
 // Backend-Specific Includes (conditionally compiled)
 // ============================================================================
 
 #ifdef USE_CUDA
-#include "backend/cuda/cuda_backend.cuh"
+#include "backend/cuda/all.cuh"
 #endif

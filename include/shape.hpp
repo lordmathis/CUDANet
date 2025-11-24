@@ -9,6 +9,7 @@
 #endif
 
 #include <format>
+#include <stdexcept>
 #include <vector>
 
 namespace CUDANet {

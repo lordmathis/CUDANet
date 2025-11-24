@@ -27,7 +27,14 @@ do { \
 namespace CUDANet::Backends {
 
 class CUDA : public Backend {
+  private:
+    int device_id;
   public:
+    CUDA(const BackendConfig& config);
+
+    static bool is_cuda_available();
+    void initialize();
+
     // Memory management
     void* allocate(size_t bytes) override;
     void  deallocate(void* ptr) override;
