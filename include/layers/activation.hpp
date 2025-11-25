@@ -20,12 +20,13 @@ enum ActivationType { SIGMOID, RELU, SOFTMAX, NONE };
  * @brief Utility class that performs activation
  * 
  */
-class Activation : public Layer {
+class Activation : public CUDANet::Layer {
   public:
 
     Activation() = default;
 
     Activation(ActivationType activation, const CUDANet::Shape &shape, CUDANet::Backend* backend);
+    Activation(ActivationType activation, const CUDANet::Shape &shape, CUDANet::DType dtype, CUDANet::Backend* backend);
 
     ~Activation() = default;
 
@@ -50,7 +51,7 @@ class Activation : public Layer {
 
   private:
     CUDANet::Backend* backend;
-    ActivationType activationType;
+    ActivationType activation_type;
     CUDANet::Shape shape;
 
     CUDANet::Tensor softmax_sum;

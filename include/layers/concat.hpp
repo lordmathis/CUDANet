@@ -12,6 +12,7 @@ class Concat {
   public:
 
     Concat(const CUDANet::Shape a_shape, const CUDANet::Shape b_shape, CUDANet::Backend *backend);
+    Concat(const CUDANet::Shape a_shape, const CUDANet::Shape b_shape, CUDANet::DType dtype, CUDANet::Backend *backend);
 
     ~Concat();
 
@@ -27,6 +28,8 @@ class Concat {
     CUDANet::Tensor output;
 
     CUDANet::Backend *backend;
+
+    CUDANet::DType dtype;
 };
 
 }  // namespace CUDANet::Layers

@@ -8,13 +8,21 @@ namespace CUDANet::Layers {
  * @brief 2D convolutional layer
  *
  */
-class Conv2d : public Layer {
+class Conv2d : public CUDANet::Layer {
   public:
     Conv2d(
         CUDANet::Shape    input_shape,
         CUDANet::Shape    kernel_shape,
         CUDANet::Shape    stride_shape,
         CUDANet::Shape    padding_shape,
+        CUDANet::Backend* backend
+    );
+    Conv2d(
+        CUDANet::Shape    input_shape,
+        CUDANet::Shape    kernel_shape,
+        CUDANet::Shape    stride_shape,
+        CUDANet::Shape    padding_shape,
+        CUDANet::DType    dtype,
         CUDANet::Backend* backend
     );
 

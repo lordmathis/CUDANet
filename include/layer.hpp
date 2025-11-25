@@ -16,6 +16,8 @@ namespace CUDANet {
  *
  */
 class Layer {
+  protected:
+    CUDANet::DType dtype;
   public:
 
     virtual ~Layer(){};
@@ -39,4 +41,4 @@ class Layer {
     virtual size_t get_biases_size() = 0;
 };
 
-}  // namespace CUDANet::Layers
+}  // namespace CUDANet

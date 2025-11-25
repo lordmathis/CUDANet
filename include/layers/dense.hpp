@@ -9,10 +9,11 @@ namespace CUDANet::Layers {
  * @brief Dense (fully connected) layer
  *
  */
-class Dense : public Layer {
+class Dense : public CUDANet::Layer {
   public:
 
     Dense(CUDANet::Shape input_shape, CUDANet::Shape output_shape, CUDANet::Backend *backend);
+    Dense(CUDANet::Shape input_shape, CUDANet::Shape output_shape, CUDANet::DType dtype, CUDANet::Backend *backend);
 
     ~Dense();
 

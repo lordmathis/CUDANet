@@ -4,9 +4,10 @@
 
 namespace CUDANet::Layers {
 
-class BatchNorm2d : public Layer {
+class BatchNorm2d : public CUDANet::Layer {
   public:
     BatchNorm2d(CUDANet::Shape input_shape, float epsilon, CUDANet::Backend *backend);
+    BatchNorm2d(CUDANet::Shape input_shape, float epsilon, CUDANet::DType dtype, CUDANet::Backend *backend);
 
     ~BatchNorm2d();
 

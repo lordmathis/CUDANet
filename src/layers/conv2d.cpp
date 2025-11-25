@@ -15,6 +15,16 @@ Conv2d::Conv2d(
     CUDANet::Shape    padding_shape,
     CUDANet::Backend* backend
 )
+    : Conv2d(input_shape, kernel_shape, stride_shape, padding_shape, backend->get_default_dtype(), backend) {}
+
+Conv2d::Conv2d(
+    CUDANet::Shape    input_shape,
+    CUDANet::Shape    kernel_shape,
+    CUDANet::Shape    stride_shape,
+    CUDANet::Shape    padding_shape,
+    CUDANet::DType    dtype,
+    CUDANet::Backend* backend
+)
     : in_shape(input_shape),
       kernel_shape(kernel_shape),
       stride_shape(stride_shape),
@@ -36,6 +46,8 @@ Conv2d::Conv2d(
         throw InvalidShapeException("padding", 3, padding_shape.size());
     }
 
+    this->dtype = dtype;
+
     out_shape = {
         (in_shape[0] - kernel_shape[0] + 2 * padding_shape[0]) /
                 stride_shape[0] +
@@ -48,17 +60,17 @@ Conv2d::Conv2d(
 
     output = CUDANet::Tensor(
         Shape{out_shape[0], out_shape[1], out_shape[2]},
-        CUDANet::DType::FLOAT32, backend
+        dtype, backend
     );
 
     weights = CUDANet::Tensor(
         Shape{
             kernel_shape[0], kernel_shape[1], kernel_shape[2], in_shape[2]
         },
-        CUDANet::DType::FLOAT32, backend
+        dtype, backend
     );
     biases = CUDANet::Tensor(
-        Shape{kernel_shape[2]}, CUDANet::DType::FLOAT32, backend
+        Shape{kernel_shape[2]}, dtype, backend
     );
 
     weights.zero();

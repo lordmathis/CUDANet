@@ -4,13 +4,21 @@
 
 namespace CUDANet::Layers {
 
-class AvgPool2d : public Layer {
+class AvgPool2d : public CUDANet::Layer {
   public:
     AvgPool2d(
         CUDANet::Shape input_shape,
         CUDANet::Shape pool_shape,
         CUDANet::Shape stride_shape,
         CUDANet::Shape padding_shape,
+        CUDANet::Backend *backend
+    );
+    AvgPool2d(
+        CUDANet::Shape input_shape,
+        CUDANet::Shape pool_shape,
+        CUDANet::Shape stride_shape,
+        CUDANet::Shape padding_shape,
+        CUDANet::DType dtype,
         CUDANet::Backend *backend
     );
 
@@ -50,6 +58,7 @@ class AvgPool2d : public Layer {
 class AdaptiveAvgPool2d : public AvgPool2d {
   public:
     AdaptiveAvgPool2d(CUDANet::Shape input_shape, CUDANet::Shape output_shape, CUDANet::Backend *backend);
+    AdaptiveAvgPool2d(CUDANet::Shape input_shape, CUDANet::Shape output_shape, CUDANet::DType dtype, CUDANet::Backend *backend);
 };
 
 }  // namespace CUDANet::Layers

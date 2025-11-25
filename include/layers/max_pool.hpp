@@ -4,13 +4,21 @@
 
 namespace CUDANet::Layers {
 
-class MaxPool2d : public Layer {
+class MaxPool2d : public CUDANet::Layer {
   public:
     MaxPool2d(
         CUDANet::Shape        input_shape,
         CUDANet::Shape        pool_shape,
         CUDANet::Shape        stride_shape,
         CUDANet::Shape        padding_shape,
+        CUDANet::Backend* backend
+    );
+    MaxPool2d(
+        CUDANet::Shape        input_shape,
+        CUDANet::Shape        pool_shape,
+        CUDANet::Shape        stride_shape,
+        CUDANet::Shape        padding_shape,
+        CUDANet::DType        dtype,
         CUDANet::Backend* backend
     );
     ~MaxPool2d();

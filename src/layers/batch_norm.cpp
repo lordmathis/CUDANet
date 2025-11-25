@@ -13,28 +13,38 @@ BatchNorm2d::BatchNorm2d(
     float          eps,
     CUDANet::Backend *backend
 )
+    : BatchNorm2d(input_shape, eps, backend->get_default_dtype(), backend) {}
+
+BatchNorm2d::BatchNorm2d(
+    CUDANet::Shape input_shape,
+    float          eps,
+    CUDANet::DType dtype,
+    CUDANet::Backend *backend
+)
     : in_shape(input_shape), backend(backend)  {
 
     if (in_shape.size() != 3) {
         throw InvalidShapeException("input", 3, in_shape.size());
     }
 
-    epsilon = CUDANet::Tensor({1}, CUDANet::DType::FLOAT32, backend);
+    this->dtype = dtype;
+
+    epsilon = CUDANet::Tensor({1}, dtype, backend);
     epsilon.set_data<float>(&eps);
 
-    running_mean = CUDANet::Tensor({in_shape[2]}, CUDANet::DType::FLOAT32, backend);
+    running_mean = CUDANet::Tensor({in_shape[2]}, dtype, backend);
     running_mean.zero();
 
-    running_var = CUDANet::Tensor({in_shape[2]}, CUDANet::DType::FLOAT32, backend);
+    running_var = CUDANet::Tensor({in_shape[2]}, dtype, backend);
     running_var.fill(1);
 
-    weights = CUDANet::Tensor({in_shape[2]}, CUDANet::DType::FLOAT32, backend);
+    weights = CUDANet::Tensor({in_shape[2]}, dtype, backend);
     weights.fill(1);
 
-    biases = CUDANet::Tensor({in_shape[2]}, CUDANet::DType::FLOAT32, backend);
+    biases = CUDANet::Tensor({in_shape[2]}, dtype, backend);
     biases.zero();
 
-    output = CUDANet::Tensor(in_shape, CUDANet::DType::FLOAT32, backend);
+    output = CUDANet::Tensor(in_shape, dtype, backend);
 }
 
 BatchNorm2d::~BatchNorm2d() {}

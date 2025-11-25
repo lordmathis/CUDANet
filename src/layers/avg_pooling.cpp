@@ -12,6 +12,16 @@ AvgPool2d::AvgPool2d(
     CUDANet::Shape    padding_shape,
     CUDANet::Backend* backend
 )
+    : AvgPool2d(input_shape, pool_shape, stride_shape, padding_shape, backend->get_default_dtype(), backend) {}
+
+AvgPool2d::AvgPool2d(
+    CUDANet::Shape    input_shape,
+    CUDANet::Shape    pool_shape,
+    CUDANet::Shape    stride_shape,
+    CUDANet::Shape    padding_shape,
+    CUDANet::DType    dtype,
+    CUDANet::Backend* backend
+)
     : in_shape(input_shape),
       pool_shape(pool_shape),
       stride_shape(stride_shape),
@@ -33,6 +43,8 @@ AvgPool2d::AvgPool2d(
         throw InvalidShapeException("padding", 2, padding_shape.size());
     }
 
+    this->dtype = dtype;
+
     out_shape = {
         (in_shape[0] + 2 * padding_shape[0] - pool_shape[0]) / stride_shape[0] +
             1,
@@ -43,7 +55,7 @@ AvgPool2d::AvgPool2d(
 
     output = CUDANet::Tensor(
         Shape{out_shape[0] * out_shape[1] * out_shape[2]},
-        CUDANet::DType::FLOAT32, backend
+        dtype, backend
     );
 }
 
@@ -97,6 +109,14 @@ AdaptiveAvgPool2d::AdaptiveAvgPool2d(
     CUDANet::Shape        output_shape,
     CUDANet::Backend *backend
 )
+    : AdaptiveAvgPool2d(input_shape, output_shape, backend->get_default_dtype(), backend) {}
+
+AdaptiveAvgPool2d::AdaptiveAvgPool2d(
+    CUDANet::Shape        input_shape,
+    CUDANet::Shape        output_shape,
+    CUDANet::DType        dtype,
+    CUDANet::Backend *backend
+)
     : AvgPool2d(
         input_shape,
         // pool_shape
@@ -114,12 +134,13 @@ AdaptiveAvgPool2d::AdaptiveAvgPool2d(
             (input_shape[0] - (output_shape[0] - 1) * (input_shape[0] / output_shape[0]) - 1) / 2,
             (input_shape[1] - (output_shape[1] - 1) * (input_shape[1] / output_shape[1]) - 1) / 2
         },
+        dtype,
         backend
     ) {
     out_shape = output_shape;
 
     output = CUDANet::Tensor(
         Shape{out_shape[0] * out_shape[1] * out_shape[2]},
-        CUDANet::DType::FLOAT32, backend
+        dtype, backend
     );
 }

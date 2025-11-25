@@ -6,6 +6,9 @@
 using namespace CUDANet::Layers;
 
 Dense::Dense(CUDANet::Shape in_shape, CUDANet::Shape out_shape, CUDANet::Backend* backend)
+    : Dense(in_shape, out_shape, backend->get_default_dtype(), backend) {}
+
+Dense::Dense(CUDANet::Shape in_shape, CUDANet::Shape out_shape, CUDANet::DType dtype, CUDANet::Backend* backend)
     : backend(backend),
       in_shape(in_shape),
       out_shape(out_shape) {
@@ -18,9 +21,11 @@ Dense::Dense(CUDANet::Shape in_shape, CUDANet::Shape out_shape, CUDANet::Backend
         throw InvalidShapeException("output", 1, out_shape.size());
     }
 
-    weights = CUDANet::Tensor(Shape{out_shape[0], in_shape[0]}, CUDANet::DType::FLOAT32, backend);
-    biases = CUDANet::Tensor(Shape{out_shape[0]}, CUDANet::DType::FLOAT32, backend);
-    output = CUDANet::Tensor(Shape{out_shape[0]}, CUDANet::DType::FLOAT32, backend);
+    this->dtype = dtype;
+
+    weights = CUDANet::Tensor(Shape{out_shape[0], in_shape[0]}, dtype, backend);
+    biases = CUDANet::Tensor(Shape{out_shape[0]}, dtype, backend);
+    output = CUDANet::Tensor(Shape{out_shape[0]}, dtype, backend);
 
     weights.zero();
     biases.zero();
