@@ -16,11 +16,14 @@ enum class DType
     // INT32,  // Not implemented yet
 };
 
+size_t dtype_size(DType dtype);
+
 class Tensor
 {
 public:
 
     Tensor() = default;
+    Tensor(Shape shape, CUDANet::Backend* backend);
     Tensor(Shape shape, DType dtype, CUDANet::Backend* backend);
 
     Tensor(Tensor&& other) noexcept;
@@ -29,6 +32,8 @@ public:
     Tensor& operator=(const Tensor&) = delete;
 
     ~Tensor();
+
+    DType get_dtype();
 
     size_t size() const;
     size_t numel() const;

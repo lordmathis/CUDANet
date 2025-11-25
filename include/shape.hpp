@@ -66,6 +66,12 @@ struct Shape {
     __host__ bool operator!=(const Shape& other) const {
         return !(*this == other);
     }
+
+    __host__ __device__ bool empty() const {
+        return ndim == 0;
+    }
+
+
 };
 
 std::string format_shape(const Shape& shape) {

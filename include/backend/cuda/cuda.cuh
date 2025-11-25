@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <set>
 
 #include "backend.hpp"
 #include "tensor.hpp"
@@ -29,8 +30,13 @@ namespace CUDANet::Backends {
 class CUDA : public Backend {
   private:
     int device_id;
+    std::set<DType> supported_dtypes;
   public:
     CUDA(const BackendConfig& config);
+
+    bool supports_dtype(DType dtype) const override;
+    void set_default_dtype(DType dtype) override;
+    DType get_default_dtype() const override;
 
     static bool is_cuda_available();
     void initialize();

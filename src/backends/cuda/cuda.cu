@@ -5,12 +5,15 @@
 #include <format>
 
 #include "backend/cuda/cuda.cuh"
+#include "tensor.hpp"
 
 using namespace CUDANet::Backends;
 
 
 CUDA::CUDA(const BackendConfig& config) {
     device_id = config.device_id < 0 ? 0 : config.device_id;
+    supported_dtypes = {DType::FLOAT32};
+    default_dtype = DType::FLOAT32;
     initialize();
 }
 
@@ -40,6 +43,28 @@ void CUDA::initialize() {
 
     std::printf("Using CUDA device %d: %s\n", device_id, deviceProp.name);
 }
+
+bool CUDA::supports_dtype(DType dtype) const {
+    return supported_dtypes.contains(dtype);
+}
+
+void CUDA::set_default_dtype(DType dtype) {
+    if (!supported_dtypes.contains(dtype)) {
+        throw std::runtime_error("Unsupported dtype");
+    }
+
+    default_dtype = dtype;
+}
+
+CUDANet::DType CUDA::get_default_dtype() const {
+    if (default_dtype) {
+        return default_dtype.value();
+    }
+    
+    const_cast<CUDA*>(this)->default_dtype = DType::FLOAT32;
+    return DType::FLOAT32;
+}
+
 
 void* CUDA::allocate(size_t bytes) {
     void* d_ptr = nullptr;

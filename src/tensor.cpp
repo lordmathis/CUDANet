@@ -1,20 +1,27 @@
-#include <stdexcept>
-
 #include "tensor.hpp"
+
+#include <stdexcept>
 
 using namespace CUDANet;
 
+Tensor::Tensor(Shape shape, CUDANet::Backend* backend)
+    : Tensor(shape, backend->get_default_dtype(), backend) {}
+
 Tensor::Tensor(Shape shape, DType dtype, Backend* backend)
     : shape(shape), dtype(dtype), backend(backend), d_ptr(nullptr) {
-
     if (shape.empty()) {
         throw std::runtime_error("Tensor shape cannot be empty");
     }
-    
+
+    // Check if backend supports DType
+    if (!backend->supports_dtype(dtype)) {
+        throw std::runtime_error("Unsupported DType");
+    }
+
     // Count total elements
     size_t count = 1;
-    for (const auto& dim : shape) {
-        count *= dim;
+    for (size_t i = 0; i < shape.size(); ++i) {
+        count *= shape[i];
     }
     total_elms = count;
 
@@ -39,9 +46,8 @@ Tensor::Tensor(Tensor&& other) noexcept
       total_elms(other.total_elms),
       total_size(other.total_size),
       backend(other.backend),
-      d_ptr(other.d_ptr)
-{
-    other.d_ptr = nullptr;
+      d_ptr(other.d_ptr) {
+    other.d_ptr   = nullptr;
     other.backend = nullptr;
 }
 
@@ -51,17 +57,17 @@ Tensor& Tensor::operator=(Tensor&& other) noexcept {
         if (d_ptr != nullptr && backend != nullptr) {
             backend->deallocate(d_ptr);
         }
-        
+
         // Steal other's resources
-        shape = std::move(other.shape);
-        dtype = other.dtype;
+        shape      = std::move(other.shape);
+        dtype      = other.dtype;
         total_elms = other.total_elms;
         total_size = other.total_size;
-        backend = other.backend;
-        d_ptr = other.d_ptr;
-        
+        backend    = other.backend;
+        d_ptr      = other.d_ptr;
+
         // Leave other in valid but empty state
-        other.d_ptr = nullptr;
+        other.d_ptr   = nullptr;
         other.backend = nullptr;
     }
     return *this;
