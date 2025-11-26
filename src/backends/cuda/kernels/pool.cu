@@ -3,9 +3,20 @@
 
 using namespace CUDANet;
 
-__global__ void Kernels::max_pool(
+template __global__ void Kernels::max_pool<float>(
     const float* __restrict__ d_input,
     float* __restrict__ d_output,
+    const Shape input_shape,
+    const Shape output_shape,
+    const Shape pool_shape,
+    const Shape stride_shape,
+    const Shape padding_shape
+);
+
+template <typename T>
+__global__ void Kernels::max_pool(
+    const T* __restrict__ d_input,
+    T* __restrict__ d_output,
     const Shape input_shape,
     const Shape output_shape,
     const Shape pool_shape,
@@ -20,7 +31,7 @@ __global__ void Kernels::max_pool(
         return;
     }
 
-    float max = 0.0f;
+    T max = static_cast<T>(0);
 
     for (int k = 0; k < pool_shape[0]; k++) {
         for (int l = 0; l < pool_shape[1]; l++) {
@@ -43,9 +54,20 @@ __global__ void Kernels::max_pool(
             max;
 }
 
-__global__ void Kernels::avg_pool(
+template __global__ void Kernels::avg_pool<float>(
     const float* __restrict__ d_input,
     float* __restrict__ d_output,
+    const Shape input_shape,
+    const Shape output_shape,
+    const Shape pool_shape,
+    const Shape stride_shape,
+    const Shape padding_shape
+);
+
+template <typename T>
+__global__ void Kernels::avg_pool(
+    const T* __restrict__ d_input,
+    T* __restrict__ d_output,
     const Shape input_shape,
     const Shape output_shape,
     const Shape pool_shape,
@@ -60,7 +82,7 @@ __global__ void Kernels::avg_pool(
         return;
     }
 
-    float sum = 0.0f;
+    T sum = static_cast<T>(0);
 
     for (int k = 0; k < pool_shape[0]; k++) {
         for (int l = 0; l < pool_shape[1]; l++) {

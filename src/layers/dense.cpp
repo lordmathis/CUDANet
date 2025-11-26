@@ -56,6 +56,7 @@ size_t Dense::output_size() {
     return out_shape[0];
 };
 
+// TODO: Use dtype
 void Dense::set_weights(void* input) {
     weights.set_data<float>(static_cast<float*>(input));
 }

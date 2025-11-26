@@ -4,188 +4,105 @@
 
 namespace CUDANet::Kernels {
 
-/**
- * @brief Matrix vector multiplication kernel
- *
- * @param d_matrix Device pointer to matrix
- * @param d_vector Device pointer to vector
- * @param d_output Device pointer to output vector
- * @param w Width of the matrix
- * @param h Height of the matrix
- */
+template <typename T>
 __global__ void mat_vec_mul(
-    const float* __restrict__ d_matrix,
-    const float* __restrict__ d_vector,
-    float* __restrict__ d_output,
+    const T* __restrict__ d_matrix,
+    const T* __restrict__ d_vector,
+    T* __restrict__ d_output,
     const unsigned int w,
     const unsigned int h
 );
 
-/**
- * @brief Vector vector addition kernel
- *
- * @param d_vector1 Device pointer to first vector
- * @param d_vector2 Device pointer to second vector
- * @param d_output Device pointer to output vector
- * @param w Length of the vectors
- */
+template <typename T>
 __global__ void vec_vec_add(
-    const float* __restrict__ d_vector1,
-    const float* __restrict__ d_vector2,
-    float* __restrict__ d_output,
+    const T* __restrict__ d_vector1,
+    const T* __restrict__ d_vector2,
+    T* __restrict__ d_output,
     const unsigned int w
 );
 
-/**
- * @brief Vector vector subtraction kernel
- * 
- * @param d_vector1 
- * @param d_vector2 
- * @param d_output 
- * @param w 
- * @return __global__ 
- */
+template <typename T>
 __global__ void vec_vec_sub(
-    const float* __restrict__ d_vector1,
-    const float* __restrict__ d_vector2,
-    float* __restrict__ d_output,
+    const T* __restrict__ d_vector1,
+    const T* __restrict__ d_vector2,
+    T* __restrict__ d_output,
     const unsigned int w
 );
 
+template <typename T>
 __global__ void vec_vec_mul(
-    const float* __restrict__ d_vector1,
-    const float* __restrict__ d_vector2,
-    float* __restrict__ d_output,
+    const T* __restrict__ d_vector1,
+    const T* __restrict__ d_vector2,
+    T* __restrict__ d_output,
     const unsigned int w
 );
 
-/**
- * @brief Sub scalar from each element of the vector
- * 
- * @param d_vector 
- * @param d_scalar 
- * @param d_output 
- * @param w 
- * @return __global__ 
- */
+template <typename T>
 __global__ void vec_scalar_sub(
-    const float* __restrict__ d_src,
-    float* __restrict__ d_out,
-    const float* __restrict__ d_scalar,
+    const T* __restrict__ d_src,
+    T* __restrict__ d_out,
+    const T* __restrict__ d_scalar,
     const unsigned int len
 );
 
-/**
- * @brief Add scalar to each element of the vector
- * 
- * @param d_src 
- * @param d_out 
- * @param d_scalar 
- * @param len 
- * @return __global__ 
- */
+template <typename T>
 __global__ void vec_scalar_add(
-    const float* __restrict__ d_src,
-    float* __restrict__ d_out,
-    const float* __restrict__ d_scalar,
+    const T* __restrict__ d_src,
+    T* __restrict__ d_out,
+    const T* __restrict__ d_scalar,
     const unsigned int len
 );
 
-/**
- * @brief Divide each element of the vector by a scalar
- *
- * @param src Pointer to the source array
- * @param dst Pointer to the destination array
- * @param len Length of the arrays
- */
+template <typename T>
 __global__ void vec_scalar_div(
-    const float* __restrict__ d_src,
-    float* __restrict__ d_out,
-    const float* __restrict__ d_scalar,
+    const T* __restrict__ d_src,
+    T* __restrict__ d_out,
+    const T* __restrict__ d_scalar,
     const unsigned int len
 );
 
-/**
- * @brief Multiply each element of the vector by a scalar
- * 
- * @param d_src 
- * @param d_out 
- * @param d_scalar 
- * @param len 
- * @return __global__ 
- */
+template <typename T>
 __global__ void vec_scalar_mul(
-    const float* __restrict__ d_src,
-    float* __restrict__ d_out,
-    const float* __restrict__ d_scalar,
+    const T* __restrict__ d_src,
+    T* __restrict__ d_out,
+    const T* __restrict__ d_scalar,
     const unsigned int len
 );
 
-/**
- * @brief Exponentiate each element of the vector
- *
- * @param src Pointer to the source array
- * @param dst Pointer to the destination array
- * @param len Length of the arrays
- */
+template <typename T>
 __global__ void vec_exp(
-    const float* __restrict__ src,
-    float* __restrict__ dst,
+    const T* __restrict__ src,
+    T* __restrict__ dst,
     const unsigned int len
 );
 
-/**
- * @brief Compute the square root of each element of the vector
- * 
- * @param src Device pointer to source vector
- * @param dst Device pointer to destination vector
- * @param len Length of the vector
- */
+template <typename T>
 __global__ void vec_sqrt(
-    const float* __restrict__ src,
-    float* __restrict__ dst,
+    const T* __restrict__ src,
+    T* __restrict__ dst,
     const unsigned int len
 );
 
-/**
- * @brief Scales the vector by 1/sqrt(scale + epsilon)
- * 
- * @param src Device pointer to source vector
- * @param dst Device pointer to destination vector
- * @param scale Scale
- * @param epsilon Epsilon
- * @param len Length of the vector
- */
+template <typename T>
 __global__ void vec_scale(
-    const float* __restrict__ src,
-    float* __restrict__ dst,
-    const float* __restrict__ scale,
-    const float* epsilon,
+    const T* __restrict__ src,
+    T* __restrict__ dst,
+    const T* __restrict__ scale,
+    const T* epsilon,
     const unsigned int len
 );
 
-/**
- * @brief Max reduction kernel
- *
- * @param d_vector Device pointer to vector
- * @param d_output Device pointer to output vector
- */
+template <typename T>
 __global__ void max_reduce(
-    const float* __restrict__ d_vector,
-    float* __restrict__ d_output,
+    const T* __restrict__ d_vector,
+    T* __restrict__ d_output,
     const unsigned int len
 );
 
-/**
- * @brief 
- * 
- * @param d_vector Device pointer to vector
- * @param d_output Device pointer to output vector
- * @param len Length of the vector
- */
+template <typename T>
 __global__ void sum_reduce(
-    const float* __restrict__ d_vector,
-    float* __restrict__ d_output,
+    const T* __restrict__ d_vector,
+    T* __restrict__ d_output,
     const unsigned int len
 );
 

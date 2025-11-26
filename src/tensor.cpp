@@ -80,6 +80,10 @@ Tensor::~Tensor() {
     }
 }
 
+DType Tensor::get_dtype() const {
+    return dtype;
+}
+
 size_t Tensor::numel() const {
     return total_elms;
 }

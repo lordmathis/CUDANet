@@ -4,11 +4,24 @@
 
 using namespace CUDANet;
 
-__global__ void Kernels::convolution(
+template __global__ void Kernels::convolution<float>(
     const float* __restrict__ d_input,
     const float* __restrict__ d_kernel,
     const float* __restrict__ d_bias,
     float* __restrict__ d_output,
+    const Shape input_shape,
+    const Shape padding_shape,
+    const Shape kernel_shape,
+    const Shape stride_shape,
+    const Shape output_shape
+);
+
+template <typename T>
+__global__ void Kernels::convolution(
+    const T* __restrict__ d_input,
+    const T* __restrict__ d_kernel,
+    const T* __restrict__ d_bias,
+    T* __restrict__ d_output,
     const Shape input_shape,
     const Shape padding_shape,
     const Shape kernel_shape,
@@ -23,7 +36,7 @@ __global__ void Kernels::convolution(
         return;
     }
 
-    float sum = 0.0f;
+    T sum = static_cast<t>(0);
 
     // Iterate over kernel and input matrix
     for (int c = 0; c < input_shape[2]; c++) {

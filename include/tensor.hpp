@@ -33,7 +33,7 @@ public:
 
     ~Tensor();
 
-    DType get_dtype();
+    DType get_dtype() const;
 
     size_t size() const;
     size_t numel() const;

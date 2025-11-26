@@ -4,29 +4,18 @@
 
 namespace CUDANet::Kernels {
 
-/**
- * @brief Sigmoid activation function kernel
- *
- * @param src Pointer to the source array
- * @param dst Pointer to the destination array
- * @param len Length of the arrays
- */
+
+template <typename T>
 __global__ void sigmoid(
-    const float* __restrict__ src,
-    float* __restrict__ dst,
+    const T* __restrict__ src,
+    T* __restrict__ dst,
     const unsigned int len
 );
 
-/**
- * @brief Relu activation function kernel
- *
- * @param src Pointer to the source array
- * @param dst Pointer to the destination array
- * @param len Length of the arrays
- */
+template <typename T>
 __global__ void relu(
-    const float* __restrict__ src,
-    float* __restrict__ dst,
+    const T* __restrict__ src,
+    T* __restrict__ dst,
     const unsigned int len
 );
 

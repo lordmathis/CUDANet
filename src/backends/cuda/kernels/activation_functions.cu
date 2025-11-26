@@ -2,9 +2,17 @@
 
 using namespace CUDANet;
 
-__global__ void Kernels::sigmoid(
+template 
+__global__ void Kernels::sigmoid<float>(
     const float* __restrict__ src,
     float* __restrict__ dst,
+    const unsigned int len
+);
+
+template <typename T>
+__global__ void Kernels::sigmoid(
+    const T* __restrict__ src,
+    T* __restrict__ dst,
     const unsigned int len
 ) {
     int stride = gridDim.x * blockDim.x;
@@ -15,9 +23,16 @@ __global__ void Kernels::sigmoid(
     }
 }
 
-__global__ void Kernels::relu(
+template __global__ void Kernels::relu<float>(
     const float* __restrict__ src,
     float* __restrict__ dst,
+    const unsigned int len
+);
+
+template <typename T>
+__global__ void Kernels::relu(
+    const T* __restrict__ src,
+    T* __restrict__ dst,
     const unsigned int len
 ) {
     int stride = gridDim.x * blockDim.x;

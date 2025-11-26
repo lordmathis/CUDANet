@@ -5,11 +5,12 @@
 
 namespace CUDANet::Kernels {
 
+template <typename T>
 __global__ void convolution(
-    const float* __restrict__ d_input,
-    const float* __restrict__ d_kernel,
-    const float* __restrict__ d_bias,
-    float* __restrict__ d_output,
+    const T* __restrict__ d_input,
+    const T* __restrict__ d_kernel,
+    const T* __restrict__ d_bias,
+    T* __restrict__ d_output,
     const Shape input_shape,
     const Shape padding_shape,
     const Shape kernel_shape,
