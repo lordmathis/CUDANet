@@ -30,7 +30,7 @@ BatchNorm2d::BatchNorm2d(
     this->dtype = dtype;
 
     epsilon = CUDANet::Tensor({1}, dtype, backend);
-    epsilon.set_data<float>(&eps);
+    epsilon.set_data(&eps);
 
     running_mean = CUDANet::Tensor({in_shape[2]}, dtype, backend);
     running_mean.zero();
@@ -81,7 +81,7 @@ size_t BatchNorm2d::output_size() {
 }
 
 void BatchNorm2d::set_weights(void* input) {
-    weights.set_data<float>(static_cast<float*>(input));
+    weights.set_data(input);
 }
 
 size_t BatchNorm2d::get_weights_size() {
@@ -89,7 +89,7 @@ size_t BatchNorm2d::get_weights_size() {
 }
 
 void BatchNorm2d::set_biases(void* input) {
-    biases.set_data<float>(static_cast<float*>(input));
+    biases.set_data(input);
 }
 
 size_t BatchNorm2d::get_biases_size() {
@@ -97,7 +97,7 @@ size_t BatchNorm2d::get_biases_size() {
 }
 
 void BatchNorm2d::set_running_mean(void* input) {
-    running_mean.set_data<float>(static_cast<float*>(input));
+    running_mean.set_data(input);
 }
 
 size_t BatchNorm2d::get_running_mean_size() {
@@ -105,7 +105,7 @@ size_t BatchNorm2d::get_running_mean_size() {
 }
 
 void BatchNorm2d::set_running_var(void* input) {
-    running_var.set_data<float>(static_cast<float*>(input));
+    running_var.set_data(input);
 }
 
 size_t BatchNorm2d::get_running_var_size() {

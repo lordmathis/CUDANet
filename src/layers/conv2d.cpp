@@ -105,7 +105,7 @@ size_t Conv2d::output_size() {
 }
 
 void Conv2d::set_weights(void* input) {
-    weights.set_data<float>(static_cast<float*>(input));
+    weights.set_data(input);
 }
 
 size_t Conv2d::get_weights_size() {
@@ -113,7 +113,7 @@ size_t Conv2d::get_weights_size() {
 }
 
 void Conv2d::set_biases(void* input) {
-    biases.set_data<float>(static_cast<float*>(input));
+    biases.set_data(input);
 }
 
 size_t Conv2d::get_biases_size() {

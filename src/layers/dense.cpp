@@ -58,7 +58,7 @@ size_t Dense::output_size() {
 
 // TODO: Use dtype
 void Dense::set_weights(void* input) {
-    weights.set_data<float>(static_cast<float*>(input));
+    weights.set_data(input);
 }
 
 size_t Dense::get_weights_size() {
@@ -66,7 +66,7 @@ size_t Dense::get_weights_size() {
 }
 
 void Dense::set_biases(void* input) {
-    biases.set_data<float>(static_cast<float*>(input));
+    biases.set_data(input);
 }
 
 size_t Dense::get_biases_size() {

@@ -92,6 +92,18 @@ size_t Tensor::size() const {
     return total_size;
 }
 
+void* Tensor::device_ptr() {
+    return d_ptr;
+}
+
 void Tensor::zero() {
     backend->zero(*this);
+}
+
+void Tensor::fill(int value) {
+    backend->fill(*this, value);
+}
+
+void Tensor::set_data(void *data) {
+    backend->copy_to_device(*this, data, total_size);
 }

@@ -16,8 +16,6 @@ enum class DType
     // INT32,  // Not implemented yet
 };
 
-size_t dtype_size(DType dtype);
-
 class Tensor
 {
 public:
@@ -38,27 +36,13 @@ public:
     size_t size() const;
     size_t numel() const;
 
-    template <typename T>
-    const T* data() const {
-        return static_cast<T*>(d_ptr);
-    }
-
-    template <typename T>
-    T* data() {
-        return static_cast<T*>(d_ptr);
-    }
+    void* device_ptr();
 
     void zero();
 
-    template <typename T>
-    void fill(T value) {
-        backend->fill(*this, value);
-    }
+    void fill(int value);
 
-    template <typename T>
-    void set_data(T *data) {
-        backend->copy_to_device(*this, data, total_size);
-    }
+    void set_data(void *data);
 
 private:
     Shape       shape;
