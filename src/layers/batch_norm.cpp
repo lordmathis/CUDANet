@@ -73,11 +73,11 @@ CUDANet::Shape BatchNorm2d::output_shape() {
 }
 
 size_t BatchNorm2d::input_size() {
-    return sizeof(float) * in_shape[0] * in_shape[1] * in_shape[2];
+    return dtype_size(dtype) * in_shape[0] * in_shape[1] * in_shape[2];
 }
 
 size_t BatchNorm2d::output_size() {
-    return sizeof(float) * in_shape[0] * in_shape[1] * in_shape[2];
+    return dtype_size(dtype) * in_shape[0] * in_shape[1] * in_shape[2];
 }
 
 void BatchNorm2d::set_weights(void* input) {

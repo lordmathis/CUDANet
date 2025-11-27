@@ -24,7 +24,7 @@ template <typename T>
 void CUDA::relu_impl(Tensor& tensor) {
     int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
     Kernels::relu<<<gridSize, BLOCK_SIZE>>>(
-        tensor.data<T>(), tensor.data<T>(), tensor.numel()
+        static_cast<T*>(tensor.device_ptr()), static_cast<T*>(tensor.device_ptr()), tensor.numel()
     );
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
@@ -48,7 +48,7 @@ template <typename T>
 void CUDA::sigmoid_impl(CUDANet::Tensor& tensor) {
     int gridSize = (tensor.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
     Kernels::sigmoid<<<gridSize, BLOCK_SIZE>>>(
-        tensor.data<T>(), tensor.data<T>(), tensor.numel()
+        static_cast<T*>(tensor.device_ptr()), static_cast<T*>(tensor.device_ptr()), tensor.numel()
     );
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
@@ -78,13 +78,13 @@ void CUDA::softmax_impl(Tensor& tensor, Tensor& temp_max, Tensor& temp_sum) {
 
     // Subtract max value to improve numerical stability
     Kernels::vec_scalar_sub<<<gridSize, BLOCK_SIZE>>>(
-        tensor.data<T>(), tensor.data<T>(), temp_max.data<T>(), tensor.numel()
+        static_cast<T*>(tensor.device_ptr()), static_cast<T*>(tensor.device_ptr()), static_cast<T*>(temp_max.device_ptr()), tensor.numel()
     );
     CUDA_CHECK(cudaGetLastError());
 
     // Compute exponentials
     Kernels::vec_exp<<<gridSize, BLOCK_SIZE>>>(
-        tensor.data<T>(), tensor.data<T>(), tensor.numel()
+        static_cast<T*>(tensor.device_ptr()), static_cast<T*>(tensor.device_ptr()), tensor.numel()
     );
     CUDA_CHECK(cudaGetLastError());
 
@@ -92,7 +92,7 @@ void CUDA::softmax_impl(Tensor& tensor, Tensor& temp_max, Tensor& temp_sum) {
     sum(tensor, temp_sum);
 
     Kernels::vec_scalar_div<<<gridSize, BLOCK_SIZE>>>(
-        tensor.data<T>(), tensor.data<T>(), temp_sum.data<T>(), tensor.numel()
+        static_cast<T*>(tensor.device_ptr()), static_cast<T*>(tensor.device_ptr()), static_cast<T*>(temp_sum.device_ptr()), tensor.numel()
     );
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
@@ -142,13 +142,13 @@ CUDANet::Tensor& CUDA::dense_impl(
     auto biasGridSize = (output_size + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     Kernels::mat_vec_mul<<<forwardGridSize, BLOCK_SIZE>>>(
-        weights.data<T>(), input.data<T>(), output.data<T>(), input_size,
+        static_cast<T*>(weights.device_ptr()), static_cast<T*>(input.device_ptr()), static_cast<T*>(output.device_ptr()), input_size,
         output_size
     );
     CUDA_CHECK(cudaGetLastError());
 
     Kernels::vec_vec_add<<<biasGridSize, BLOCK_SIZE>>>(
-        biases.data<T>(), output.data<T>(), output.data<T>(), output_size
+        static_cast<T*>(biases.device_ptr()), static_cast<T*>(output.device_ptr()), static_cast<T*>(output.device_ptr()), output_size
     );
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
@@ -213,7 +213,7 @@ CUDANet::Tensor& CUDA::conv2d_impl(
     );
 
     Kernels::convolution<<<grid, block>>>(
-        input.data<T>(), weights.data<T>(), biases.data<T>(), output.data<T>(),
+        static_cast<T*>(input.device_ptr())(), static_cast<T*>(weights.device_ptr())(), static_cast<T*>(biases.device_ptr())(), static_cast<T*>(output.device_ptr())(),
         in_shape, padding_shape, kernel_shape, stride_shape, out_shape
     );
     CUDA_CHECK(cudaGetLastError());
@@ -273,7 +273,7 @@ CUDANet::Tensor& CUDA::max_pool2d_impl(
     );
 
     Kernels::max_pool<<<grid, block>>>(
-        input.data<T>(), output.data<T>(), input_shape, output_shape,
+        static_cast<T*>(input.device_ptr())(), static_cast<T*>(output.device_ptr())(), input_shape, output_shape,
         pool_shape, stride_shape, padding_shape
     );
     CUDA_CHECK(cudaGetLastError());
@@ -333,7 +333,7 @@ CUDANet::Tensor& CUDA::avg_pool2d_impl(
     );
 
     Kernels::avg_pool<<<grid, block>>>(
-        input.data<T>(), output.data<T>(), input_shape, output_shape,
+        static_cast<T*>(input.device_ptr())(), static_cast<T*>(output.device_ptr())(), input_shape, output_shape,
         pool_shape, stride_shape, padding_shape
     );
     CUDA_CHECK(cudaGetLastError());
@@ -394,34 +394,34 @@ CUDANet::Tensor& CUDA::batch_norm_impl(
     for (int i = 0; i < input_shape[2]; i++) {
         // Subtract mean from input
         Kernels::vec_scalar_sub<<<gridSize, BLOCK_SIZE>>>(
-            input.data<T>() + i * input_shape[0] * input_shape[1],
-            output.data<T>() + i * input_shape[0] * input_shape[1],
-            &running_mean.data<T>()[i], input_shape[0] * input_shape[1]
+            static_cast<T*>(input.device_ptr())() + i * input_shape[0] * input_shape[1],
+            static_cast<T*>(output.device_ptr())() + i * input_shape[0] * input_shape[1],
+            &static_cast<T*>(running_mean.device_ptr())()[i], input_shape[0] * input_shape[1]
         );
         CUDA_CHECK(cudaGetLastError());
 
         // Divide by sqrt(running_var + epsilon)
         Kernels::vec_scale<<<gridSize, BLOCK_SIZE>>>(
-            output.data<T>() + i * input_shape[0] * input_shape[1],
-            output.data<T>() + i * input_shape[0] * input_shape[1],
-            &running_var.data<T>()[i], epsilon.data<T>(),
+            static_cast<T*>(output.device_ptr())() + i * input_shape[0] * input_shape[1],
+            static_cast<T*>(output.device_ptr())() + i * input_shape[0] * input_shape[1],
+            &static_cast<T*>(running_var.device_ptr())()[i], static_cast<T*>(epsilon.device_ptr())(),
             input_shape[0] * input_shape[1]
         );
         CUDA_CHECK(cudaGetLastError());
 
         // Multiply by weights
         Kernels::vec_scalar_mul<<<gridSize, BLOCK_SIZE>>>(
-            output.data<T>() + i * input_shape[0] * input_shape[1],
-            output.data<T>() + i * input_shape[0] * input_shape[1],
-            &weights.data<T>()[i], input_shape[0] * input_shape[1]
+            static_cast<T*>(output.device_ptr())() + i * input_shape[0] * input_shape[1],
+            static_cast<T*>(output.device_ptr())() + i * input_shape[0] * input_shape[1],
+            &static_cast<T*>(weights.device_ptr())()[i], input_shape[0] * input_shape[1]
         );
         CUDA_CHECK(cudaGetLastError());
 
         // Add biases
         Kernels::vec_scalar_add<<<gridSize, BLOCK_SIZE>>>(
-            output.data<T>() + i * input_shape[0] * input_shape[1],
-            output.data<T>() + i * input_shape[0] * input_shape[1],
-            &biases.data<T>()[i], input_shape[0] * input_shape[1]
+            static_cast<T*>(output.device_ptr())() + i * input_shape[0] * input_shape[1],
+            static_cast<T*>(output.device_ptr())() + i * input_shape[0] * input_shape[1],
+            &static_cast<T*>(biases.device_ptr())()[i], input_shape[0] * input_shape[1]
         );
         CUDA_CHECK(cudaGetLastError());
     }
@@ -460,12 +460,12 @@ CUDANet::Tensor& CUDA::concat_impl(
     CUDANet::Tensor& output
 ) {
     CUDA_CHECK(cudaMemcpy(
-        output.data<T>(), input_a.data<T>(), input_a.size(),
+        static_cast<T*>(output.device_ptr())(), static_cast<T*>(input_a.device_ptr())(), input_a.size(),
         cudaMemcpyDeviceToDevice
     ));
 
     CUDA_CHECK(cudaMemcpy(
-        output.data<T>() + input_a.numel(), input_b.data<T>(), input_b.size(),
+        static_cast<T*>(output.device_ptr())() + input_a.numel(), static_cast<T*>(input_b.device_ptr())(), input_b.size(),
         cudaMemcpyDeviceToDevice
     ));
 
@@ -508,7 +508,7 @@ CUDANet::Tensor& CUDA::add_impl(
     auto gridSize = (input_a.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     Kernels::vec_vec_add<<<gridSize, BLOCK_SIZE>>>(
-        input_a.data<T>(), input_b.data<T>(), output.data<T>(), input_a.numel()
+        static_cast<T*>(input_a.device_ptr())(), static_cast<T*>(input_b.device_ptr())(), static_cast<T*>(output.device_ptr())(), input_a.numel()
     );
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());

@@ -16,7 +16,7 @@ std::unique_ptr<Backend> BackendFactory::create(BackendType backend_type, const 
         #ifdef USE_CUDA
 
         if (!CUDANet::Backends::CUDA::is_cuda_available()) {
-            throw std::runtime_error("No CUDA devices found")
+            throw std::runtime_error("No CUDA devices found");
         }
 
         auto cuda = std::make_unique<CUDANet::Backends::CUDA>(config);
@@ -31,6 +31,7 @@ std::unique_ptr<Backend> BackendFactory::create(BackendType backend_type, const 
         break;
     
     default:
+        throw std::runtime_error("Invalid backend");
         break;
     }
 

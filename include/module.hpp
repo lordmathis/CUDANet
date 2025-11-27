@@ -15,10 +15,6 @@ class Module {
 
     CUDANet::Shape output_shape();
 
-    size_t input_size();
-
-    size_t output_size();
-
     void register_layer(const std::string& name, Layer* layer);
 
     void register_module(Module& module);

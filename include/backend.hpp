@@ -28,6 +28,7 @@ class Backend {
     std::optional<DType> default_dtype;
   public:
 
+    // Dtypes
     virtual bool supports_dtype(DType dtype) const = 0;
     virtual void set_default_dtype(DType dtype) = 0;
     virtual DType get_default_dtype() const = 0;

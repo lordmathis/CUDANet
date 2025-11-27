@@ -36,7 +36,7 @@ __global__ void Kernels::convolution(
         return;
     }
 
-    T sum = static_cast<t>(0);
+    T sum = static_cast<T>(0);
 
     // Iterate over kernel and input matrix
     for (int c = 0; c < input_shape[2]; c++) {

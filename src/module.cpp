@@ -12,22 +12,6 @@ CUDANet::Shape Module::output_shape() {
     return out_shape;
 }
 
-size_t Module::input_size() {
-    size_t count = 1;
-    for (const auto& dim : in_shape) {
-        count *= dim;
-    }
-    return sizeof(float) * count;
-}
-
-size_t Module::output_size() {
-    size_t count = 1;
-    for (const auto& dim : out_shape) {
-        count *= dim;
-    }
-    return sizeof(float) * count;
-}
-
 void Module::register_layer(const std::string& name, Layer* layer) {
     layers.push_back({name, layer});
 }

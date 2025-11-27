@@ -84,11 +84,11 @@ CUDANet::Shape AvgPool2d::output_shape() {
 }
 
 size_t AvgPool2d::input_size() {
-    return sizeof(float) * in_shape[0] * in_shape[1] * in_shape[2];
+    return dtype_size(dtype) * in_shape[0] * in_shape[1] * in_shape[2];
 }
 
 size_t AvgPool2d::output_size() {
-    return sizeof(float) * out_shape[0] * out_shape[1] * out_shape[2];
+    return dtype_size(dtype) * out_shape[0] * out_shape[1] * out_shape[2];
 }
 
 void AvgPool2d::set_weights(void* input) {}

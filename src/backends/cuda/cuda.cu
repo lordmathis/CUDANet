@@ -65,7 +65,6 @@ CUDANet::DType CUDA::get_default_dtype() const {
     return DType::FLOAT32;
 }
 
-
 void* CUDA::allocate(size_t bytes) {
     void* d_ptr = nullptr;
     CUDA_CHECK(cudaMalloc(&d_ptr, bytes));
