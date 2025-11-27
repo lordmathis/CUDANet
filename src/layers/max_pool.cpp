@@ -1,6 +1,6 @@
-#include "max_pool.hpp"
-
 #include <stdexcept>
+
+#include "layers/max_pool.hpp"
 
 using namespace CUDANet::Layers;
 

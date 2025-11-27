@@ -1,7 +1,7 @@
-#include "dense.hpp"
-
 #include <format>
 #include <stdexcept>
+
+#include "layers/dense.hpp"
 
 using namespace CUDANet::Layers;
 

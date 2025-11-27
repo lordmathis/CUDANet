@@ -1,7 +1,7 @@
+#include <format>
 #include <stdexcept>
 
-#include "avg_pool.hpp"
-#include <format>
+#include "layers/avg_pool.hpp"
 
 using namespace CUDANet::Layers;
 

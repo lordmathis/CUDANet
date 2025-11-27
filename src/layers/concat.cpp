@@ -1,4 +1,4 @@
-#include "concat.hpp"
+#include "layers/concat.hpp"
 
 using namespace CUDANet::Layers;
 

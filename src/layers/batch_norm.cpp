@@ -1,9 +1,7 @@
-#include "batch_norm.hpp"
-
 #include <stdexcept>
 #include <vector>
 
-#include "activation.hpp"
+#include "layers/batch_norm.hpp"
 #include "layer.hpp"
 
 using namespace CUDANet::Layers;

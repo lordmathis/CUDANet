@@ -1,4 +1,4 @@
-#include "add.hpp"
+#include "layers/add.hpp"
 
 using namespace CUDANet::Layers;
 

@@ -13,6 +13,7 @@ std::unique_ptr<Backend> BackendFactory::create(BackendType backend_type, const 
     switch (backend_type)
     {
     case BackendType::CUDA_BACKEND:
+        {
         #ifdef USE_CUDA
 
         if (!CUDANet::Backends::CUDA::is_cuda_available()) {
@@ -20,14 +21,12 @@ std::unique_ptr<Backend> BackendFactory::create(BackendType backend_type, const 
         }
 
         auto cuda = std::make_unique<CUDANet::Backends::CUDA>(config);
-        cuda.initialize();
-
         return cuda;
 
         #else
         throw std::runtime_error("Library was compiled without CUDA support.");
         #endif
-
+        }
         break;
     
     default:

@@ -1,6 +1,6 @@
-#include "module.hpp"
-
 #include <algorithm>
+
+#include "module.hpp"
 
 using namespace CUDANet;
 

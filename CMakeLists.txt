@@ -43,6 +43,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(${PROJECT_NAME} STATIC ${LIBRARY_SOURCES})
 
 if(USE_CUDA)
+    # Enable relocatable device code for proper template instantiation across translation units
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        CUDA_SEPARABLE_COMPILATION ON
+        CUDA_RUNTIME_LIBRARY Shared
+    )
     target_link_libraries(${PROJECT_NAME} CUDA::cudart)
 endif()
 

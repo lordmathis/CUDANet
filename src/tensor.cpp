@@ -1,6 +1,6 @@
-#include "tensor.hpp"
-
 #include <stdexcept>
+
+#include "tensor.hpp"
 
 using namespace CUDANet;
 
@@ -90,6 +90,10 @@ size_t Tensor::numel() const {
 
 size_t Tensor::size() const {
     return total_size;
+}
+
+void* Tensor::device_ptr() const {
+    return d_ptr;
 }
 
 void* Tensor::device_ptr() {

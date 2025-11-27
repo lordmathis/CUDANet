@@ -1,10 +1,10 @@
-#include "activation.hpp"
-
 #include <format>
 #include <stdexcept>
 #include <vector>
 
+#include "layers/activation.hpp"
 #include "tensor.hpp"
+
 
 using namespace CUDANet::Layers;
 

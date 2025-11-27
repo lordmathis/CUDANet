@@ -1,5 +1,3 @@
-#include "model.hpp"
-
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -8,7 +6,9 @@
 #include <vector>
 
 #include "layer.hpp"
-#include "batch_norm.hpp"
+#include "layers/batch_norm.hpp"
+
+#include "model.hpp"
 
 using namespace CUDANet;
 

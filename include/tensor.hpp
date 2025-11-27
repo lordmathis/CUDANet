@@ -29,6 +29,8 @@ size_t dtype_size(DType dtype) {
     }
 }
 
+class Backend;
+
 class Tensor
 {
 public:
@@ -49,6 +51,7 @@ public:
     size_t size() const;
     size_t numel() const;
 
+    void* device_ptr() const;
     void* device_ptr();
 
     void zero();

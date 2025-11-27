@@ -8,9 +8,10 @@
 
 namespace CUDANet {
 
-// Forward declaration
-class Tensor;
+// Forward declarations
 class Backend;
+class Tensor;
+enum class DType;
 
 enum BackendType { CUDA_BACKEND, CPU_BACKEND };
 
