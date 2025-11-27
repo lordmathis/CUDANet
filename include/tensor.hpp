@@ -16,19 +16,9 @@ enum class DType
     // INT32,  // Not implemented yet
 };
 
-size_t dtype_size(DType dtype) {
-    switch (dtype)
-    {
-    case DType::FLOAT32:
-        return 4;
-        break;
-    
-    default:
-        throw std::runtime_error("Unknown DType");
-        break;
-    }
-}
+size_t dtype_size(DType dtype);
 
+// Forward declaration
 class Backend;
 
 class Tensor

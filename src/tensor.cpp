@@ -4,6 +4,19 @@
 
 using namespace CUDANet;
 
+size_t dtype_size(DType dtype) {
+    switch (dtype)
+    {
+    case DType::FLOAT32:
+        return 4;
+        break;
+    
+    default:
+        throw std::runtime_error("Unknown DType");
+        break;
+    }
+}
+
 Tensor::Tensor(Shape shape, CUDANet::Backend* backend)
     : Tensor(shape, backend->get_default_dtype(), backend) {}
 
