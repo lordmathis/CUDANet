@@ -26,7 +26,7 @@ void CUDA::print_impl(const CUDANet::Tensor &input) {
     std::vector<T> h_vec(input.numel());
 
     CUDA_CHECK(cudaMemcpy(
-        h_vec.data(), static_cast<T*>(input.device_ptr()), sizeof(T) * length, cudaMemcpyDeviceToHost
+        h_vec.data(), static_cast<const T*>(input.device_ptr()), sizeof(T) * length, cudaMemcpyDeviceToHost
     ));
 
     for (int i = 0; i < length; ++i) {
@@ -98,7 +98,7 @@ void CUDA::sum_impl(const CUDANet::Tensor &input, CUDANet::Tensor &sum) {
     const int gridSize = (length + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     CUDANet::Kernels::sum_reduce<<<gridSize, BLOCK_SIZE>>>(
-        static_cast<T*>(input.device_ptr()), static_cast<T*>(sum.device_ptr()), length
+        static_cast<const T*>(input.device_ptr()), static_cast<T*>(sum.device_ptr()), length
     );
     CUDA_CHECK(cudaGetLastError());
 
@@ -131,7 +131,7 @@ void CUDA::max_impl(const CUDANet::Tensor &input, CUDANet::Tensor &max) {
     auto length = input.numel();
     const int grid_size = (length + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
-    Kernels::max_reduce<<<grid_size, BLOCK_SIZE>>>(static_cast<T*>(input.device_ptr()), static_cast<T*>(max.device_ptr()), length);
+    Kernels::max_reduce<<<grid_size, BLOCK_SIZE>>>(static_cast<const T*>(input.device_ptr()), static_cast<T*>(max.device_ptr()), length);
     CUDA_CHECK(cudaGetLastError());
 
     int remaining = grid_size;

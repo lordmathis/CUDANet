@@ -142,13 +142,13 @@ CUDANet::Tensor& CUDA::dense_impl(
     auto biasGridSize = (output_size + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     Kernels::mat_vec_mul<<<forwardGridSize, BLOCK_SIZE>>>(
-        static_cast<T*>(weights.device_ptr()), static_cast<T*>(input.device_ptr()), static_cast<T*>(output.device_ptr()), input_size,
+        static_cast<const T*>(weights.device_ptr()), static_cast<const T*>(input.device_ptr()), static_cast<T*>(output.device_ptr()), input_size,
         output_size
     );
     CUDA_CHECK(cudaGetLastError());
 
     Kernels::vec_vec_add<<<biasGridSize, BLOCK_SIZE>>>(
-        static_cast<T*>(biases.device_ptr()), static_cast<T*>(output.device_ptr()), static_cast<T*>(output.device_ptr()), output_size
+        static_cast<const T*>(biases.device_ptr()), static_cast<T*>(output.device_ptr()), static_cast<T*>(output.device_ptr()), output_size
     );
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
@@ -213,7 +213,7 @@ CUDANet::Tensor& CUDA::conv2d_impl(
     );
 
     Kernels::convolution<<<grid, block>>>(
-        static_cast<T*>(input.device_ptr()), static_cast<T*>(weights.device_ptr()), static_cast<T*>(biases.device_ptr()), static_cast<T*>(output.device_ptr()),
+        static_cast<const T*>(input.device_ptr()), static_cast<const T*>(weights.device_ptr()), static_cast<const T*>(biases.device_ptr()), static_cast<T*>(output.device_ptr()),
         in_shape, padding_shape, kernel_shape, stride_shape, out_shape
     );
     CUDA_CHECK(cudaGetLastError());
@@ -273,7 +273,7 @@ CUDANet::Tensor& CUDA::max_pool2d_impl(
     );
 
     Kernels::max_pool<<<grid, block>>>(
-        static_cast<T*>(input.device_ptr()), static_cast<T*>(output.device_ptr()), input_shape, output_shape,
+        static_cast<const T*>(input.device_ptr()), static_cast<T*>(output.device_ptr()), input_shape, output_shape,
         pool_shape, stride_shape, padding_shape
     );
     CUDA_CHECK(cudaGetLastError());
@@ -333,7 +333,7 @@ CUDANet::Tensor& CUDA::avg_pool2d_impl(
     );
 
     Kernels::avg_pool<<<grid, block>>>(
-        static_cast<T*>(input.device_ptr()), static_cast<T*>(output.device_ptr()), input_shape, output_shape,
+        static_cast<const T*>(input.device_ptr()), static_cast<T*>(output.device_ptr()), input_shape, output_shape,
         pool_shape, stride_shape, padding_shape
     );
     CUDA_CHECK(cudaGetLastError());
@@ -394,7 +394,7 @@ CUDANet::Tensor& CUDA::batch_norm_impl(
     for (int i = 0; i < input_shape[2]; i++) {
         // Subtract mean from input
         Kernels::vec_scalar_sub<<<gridSize, BLOCK_SIZE>>>(
-            static_cast<T*>(input.device_ptr()) + i * input_shape[0] * input_shape[1],
+            static_cast<const T*>(input.device_ptr()) + i * input_shape[0] * input_shape[1],
             static_cast<T*>(output.device_ptr()) + i * input_shape[0] * input_shape[1],
             &static_cast<T*>(running_mean.device_ptr())[i], input_shape[0] * input_shape[1]
         );
@@ -460,12 +460,12 @@ CUDANet::Tensor& CUDA::concat_impl(
     CUDANet::Tensor& output
 ) {
     CUDA_CHECK(cudaMemcpy(
-        static_cast<T*>(output.device_ptr()), static_cast<T*>(input_a.device_ptr()), input_a.size(),
+        static_cast<T*>(output.device_ptr()), static_cast<const T*>(input_a.device_ptr()), input_a.size(),
         cudaMemcpyDeviceToDevice
     ));
 
     CUDA_CHECK(cudaMemcpy(
-        static_cast<T*>(output.device_ptr()) + input_a.numel(), static_cast<T*>(input_b.device_ptr()), input_b.size(),
+        static_cast<T*>(output.device_ptr()) + input_a.numel(), static_cast<const T*>(input_b.device_ptr()), input_b.size(),
         cudaMemcpyDeviceToDevice
     ));
 
@@ -508,7 +508,7 @@ CUDANet::Tensor& CUDA::add_impl(
     auto gridSize = (input_a.numel() + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     Kernels::vec_vec_add<<<gridSize, BLOCK_SIZE>>>(
-        static_cast<T*>(input_a.device_ptr()), static_cast<T*>(input_b.device_ptr()), static_cast<T*>(output.device_ptr()), input_a.numel()
+        static_cast<const T*>(input_a.device_ptr()), static_cast<const T*>(input_b.device_ptr()), static_cast<T*>(output.device_ptr()), input_a.numel()
     );
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
