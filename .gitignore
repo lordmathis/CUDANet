@@ -36,6 +36,7 @@ build/
 .cache
 
 venv
+.venv
 docs
 
 __pycache__
