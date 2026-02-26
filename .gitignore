@@ -46,3 +46,6 @@ __pycache__
 
 # Test files
 *.jpg
+
+# Test fixtures
+fixtures/
