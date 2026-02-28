@@ -45,9 +45,9 @@ void run_matmul_test(const MatMulParams params) {
         (std::max(params.rows, params.cols) + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     CUDANet::Kernels::mat_vec_mul<<<grid_size, BLOCK_SIZE>>>(
-        matrix.device_ptr(),
-        vector.device_ptr(),
-        output.device_ptr(),
+        static_cast<const T*>(matrix.device_ptr()),
+        static_cast<const T*>(vector.device_ptr()),
+        static_cast<T*>(output.device_ptr()),
         params.rows,
         params.cols
     );
