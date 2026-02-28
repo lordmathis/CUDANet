@@ -10,9 +10,9 @@ struct MatMulParams
     CUDANet::DType dtype;
     const int rows;
     const int cols;
-    const& std::string& matrix_path;
-    const& std::string& vector_path;
-    const& std::string& expected_path;
+    std::string matrix_path;
+    std::string vector_path;
+    std::string expected_path;
 };
 
 class MatVecMulTest : public ::testing::TestWithParam<MatMulParams> {};
@@ -33,19 +33,19 @@ void run_matmul_test(const MatMulParams params) {
     auto vector_data = load_binary<T>(FIXTURES_PATH + "/" + params.vector_path);
     auto expected_data = load_binary<T>(FIXTURES_PATH + "/" + params.expected_path);
 
-    auto backend = CUDANet::BackendFactory.create(CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig());
+    auto backend = CUDANet::BackendFactory::create(CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig());
 
     auto matrix_shape = CUDANet::Shape{params.rows, params.cols};
     auto matrix = CUDANet::Tensor(matrix_shape, params.dtype, backend);
-    matrix::set_data(matrix_data);
+    matrix.set_data(matrix_data.data());
 
     auto vector_shape = CUDANet::Shape{params.cols};
     auto vector = CUDANet::Tensor(vector_shape, params.dtype, backend);
-    vector::set_data(vector_data);
+    vector.set_data(vector_data.data());
 
     auto expected_shape = CUDANet::Shape{params.rows};
     auto expected = CUDANet::Tensor(expected_shape, params.dtype, backend);
-    expected::set_data(expected_data);
+    expected.set_data(expected_data.data());
 
     auto output = CUDANet::Tensor(expected_shape, params.dtype, backend);
     output::zero();
@@ -55,17 +55,17 @@ void run_matmul_test(const MatMulParams params) {
         (std::max(params.rows, params.cols) + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     Kernels::mat_vec_mul<<<grid_size, BLOCK_SIZE>>>(
-        matrix.device_ptr,
-        vector.device_ptr,
-        output.device_ptr,
-        rows,
-        cols
+        matrix.device_ptr(),
+        vector.device_ptr(),
+        output.device_ptr(),
+        params.rows,
+        params.cols
     );
 
     std::vector<T> h_output = output.to_host();
     std::vector<T> h_expected = expected.to_host();
 
-    ASSERT_EQ(h_output.size(), h_expected.size())
+    ASSERT_EQ(h_output.size(), h_expected.size());
 
     assert_elements_near(h_output, h_expected);
 }
@@ -87,11 +87,13 @@ std::vector<MatMulParams> initialize_params() {
             dtype,
             rows,
             cols,
-            rows[3],
-            rows[4],
-            rows[5]
+            row[3],
+            row[4],
+            row[5]
         });
     }
+
+    return params;
 }
 
 // Instantiate with test cases  
