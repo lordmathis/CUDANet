@@ -74,7 +74,7 @@ struct Shape {
 
 };
 
-std::string format_shape(const Shape& shape) {
+inline std::string format_shape(const Shape& shape) {
     std::string result;
     for (size_t i = 0; i < shape.size(); ++i) {
         if (i > 0) result += ", ";
