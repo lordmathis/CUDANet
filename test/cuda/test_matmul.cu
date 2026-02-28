@@ -60,7 +60,14 @@ void run_matmul_test(const MatMulParams params) {
         output.device_ptr,
         rows,
         cols
-    )
+    );
+
+    std::vector<T> h_output = output.to_host();
+    std::vector<T> h_expected = expected.to_host();
+
+    ASSERT_EQ(h_output.size(), h_expected.size())
+
+    assert_elements_near(h_output, h_expected);
 }
 
 std::vector<MatMulParams> initialize_params() {

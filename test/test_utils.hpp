@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <type_traits>
+#include <limits>
 
 inline std::vector<std::vector<std::string>> load_csv(const std::string& path)
 {
@@ -44,3 +46,13 @@ std::vector<T> load_binary(const std::string& path)
     return data;
 }
 
+template<typename T>
+void assert_elements_near(const std::vector<T>& actual, const std::vector<T>& expected) {
+    for (size_t i = 0; i < actual.size(); ++i) {
+        if constexpr (std::is_floating_point_v<T>) {
+            EXPECT_NEAR(actual[i], expected[i], 1e-4f);
+        } else {
+            EXPECT_EQ(actual[i], expected[i]);
+        }
+    }
+}
