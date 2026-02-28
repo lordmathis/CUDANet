@@ -27,18 +27,18 @@ void run_matmul_test(const MatMulParams params) {
     auto backend = CUDANet::BackendFactory::create(CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig());
 
     auto matrix_shape = CUDANet::Shape{params.rows, params.cols};
-    auto matrix = CUDANet::Tensor(matrix_shape, params.dtype, backend);
+    auto matrix = CUDANet::Tensor(matrix_shape, params.dtype, backend.get());
     matrix.set_data(matrix_data.data());
 
     auto vector_shape = CUDANet::Shape{params.cols};
-    auto vector = CUDANet::Tensor(vector_shape, params.dtype, backend);
+    auto vector = CUDANet::Tensor(vector_shape, params.dtype, backend.get());
     vector.set_data(vector_data.data());
 
     auto expected_shape = CUDANet::Shape{params.rows};
-    auto expected = CUDANet::Tensor(expected_shape, params.dtype, backend);
+    auto expected = CUDANet::Tensor(expected_shape, params.dtype, backend.get());
     expected.set_data(expected_data.data());
 
-    auto output = CUDANet::Tensor(expected_shape, params.dtype, backend);
+    auto output = CUDANet::Tensor(expected_shape, params.dtype, backend.get());
     output.zero();
 
     auto grid_size =
@@ -52,8 +52,8 @@ void run_matmul_test(const MatMulParams params) {
         params.cols
     );
 
-    std::vector<T> h_output = output.to_host();
-    std::vector<T> h_expected = expected.to_host();
+    std::vector<T> h_output = output.to_host<T>();
+    std::vector<T> h_expected = expected.to_host<T>();
 
     ASSERT_EQ(h_output.size(), h_expected.size());
 
