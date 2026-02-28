@@ -4,7 +4,6 @@
 #include <optional>
 
 #include "shape.hpp"
-#include "tensor.hpp"
 
 namespace CUDANet {
 
@@ -45,6 +44,8 @@ class Backend {
 
     virtual void
     copy_to_device(CUDANet::Tensor& tensor, void* data, size_t size) = 0;
+    virtual void
+    copy_to_host(CUDANet::Tensor& tensor, void* output) = 0;
 
     virtual void sum(const CUDANet::Tensor& input, CUDANet::Tensor& sum) = 0;
     virtual void max(const CUDANet::Tensor& input, CUDANet::Tensor& max) = 0;

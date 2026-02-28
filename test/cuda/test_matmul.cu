@@ -8,23 +8,14 @@ const std::string FIXTURES_PATH="matmul";
 struct MatMulParams
 {
     CUDANet::DType dtype;
-    const int rows;
-    const int cols;
+    const size_t rows;
+    const size_t cols;
     std::string matrix_path;
     std::string vector_path;
     std::string expected_path;
 };
 
 class MatVecMulTest : public ::testing::TestWithParam<MatMulParams> {};
-
-TEST_P(MatVecMulTest, MatrixVectorMultiplication) {  
-    auto param = GetParam(); // Get the current SumTestParams  
-
-    // DType dispatch
-    if (param.dtype == CUDANet::DType::FLOAT32) {
-        run_matmul_test<float>();
-    }
-}
 
 template<typename T>
 void run_matmul_test(const MatMulParams params) {
@@ -48,13 +39,12 @@ void run_matmul_test(const MatMulParams params) {
     expected.set_data(expected_data.data());
 
     auto output = CUDANet::Tensor(expected_shape, params.dtype, backend);
-    output::zero();
+    output.zero();
 
-    auto BLOCK_SIZE = 256;
     auto grid_size =
         (std::max(params.rows, params.cols) + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
-    Kernels::mat_vec_mul<<<grid_size, BLOCK_SIZE>>>(
+    CUDANet::Kernels::mat_vec_mul<<<grid_size, BLOCK_SIZE>>>(
         matrix.device_ptr(),
         vector.device_ptr(),
         output.device_ptr(),
@@ -70,6 +60,17 @@ void run_matmul_test(const MatMulParams params) {
     assert_elements_near(h_output, h_expected);
 }
 
+template void run_matmul_test<float>(const MatMulParams params);
+
+TEST_P(MatVecMulTest, MatrixVectorMultiplication) {  
+    auto param = GetParam(); 
+
+    // DType dispatch
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_matmul_test<float>(param);
+    }
+}
+
 std::vector<MatMulParams> initialize_params() {
     std::vector<std::vector<std::string>> rows = load_csv("matmul/metadata.csv");
 
@@ -80,8 +81,8 @@ std::vector<MatMulParams> initialize_params() {
             ? CUDANet::DType::FLOAT32
             : throw std::runtime_error("Unknown dtype: " + row[0]);
 
-        int rows = std::stoi(row[1]);
-        int cols = std::stoi(row[2]);
+        size_t rows = std::stoul(row[1]);
+        size_t cols = std::stoul(row[2]);
 
         params.push_back(MatMulParams{
             dtype,

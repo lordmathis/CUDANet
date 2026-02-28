@@ -16,6 +16,7 @@ if(USE_CUDA)
     set_target_properties(test_main PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 endif()
 
+set_property(TARGET test_main PROPERTY CXX_STANDARD 20)
 target_include_directories(test_main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(test_main ${GTEST_BOTH_LIBRARIES} CUDANet)
 

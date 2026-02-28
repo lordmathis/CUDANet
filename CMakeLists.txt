@@ -59,4 +59,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 
 # Add testing subdirectory
-add_subdirectory(test)
+option(BUILD_TESTS "Build tests" OFF)
+if(BUILD_TESTS)
+    add_subdirectory(test)
+endif()
