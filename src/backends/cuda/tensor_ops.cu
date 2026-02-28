@@ -78,6 +78,25 @@ void CUDA::copy_to_device_impl(CUDANet::Tensor &tensor, void *data, size_t size)
     CUDA_CHECK(cudaMemcpy(static_cast<T*>(tensor.device_ptr()), data, size, cudaMemcpyHostToDevice));
 }
 
+void CUDA::copy_to_host(CUDANet::Tensor &tensor, void* output) {
+    switch (tensor.get_dtype()) {
+    case DType::FLOAT32:
+        copy_to_host_impl<float>(tensor, output);
+        break;
+    default:
+        throw std::runtime_error("Unsupported dtype");
+        break;
+    }
+}
+
+template void CUDA::copy_to_host_impl<float>(CUDANet::Tensor &tensor, void* output);
+
+template <typename T>
+void CUDA::copy_to_host_impl(CUDANet::Tensor &tensor, void* output) {
+    CUDA_CHECK(cudaMemcpy(static_cast<T*>(output), static_cast<const T*>(tensor.device_ptr()), tensor.size(), cudaMemcpyDeviceToHost));
+}
+
+
 void CUDA::sum(const CUDANet::Tensor &input, CUDANet::Tensor &sum) {
     switch (input.get_dtype()) {
     case DType::FLOAT32:

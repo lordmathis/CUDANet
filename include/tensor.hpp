@@ -50,6 +50,13 @@ public:
 
     void set_data(void *data);
 
+    template <typename T>
+    std::vector<T> to_host() {
+        std::vector<T> h_vec(numel());
+        backend->copy_to_host(*this, h_vec.data());
+        return h_vec;
+    }
+
 private:
     Shape       shape;
     DType       dtype;

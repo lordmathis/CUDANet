@@ -56,8 +56,12 @@ class CUDA : public Backend {
     void print(const CUDANet::Tensor& input) override;
     void zero(CUDANet::Tensor& input) override;
     void fill(CUDANet::Tensor& input, int value) override;
+
     void
     copy_to_device(CUDANet::Tensor& tensor, void* data, size_t size) override;
+
+    void copy_to_host(CUDANet::Tensor& tensor, void* output);
+
     void sum(const CUDANet::Tensor& input, CUDANet::Tensor& sum) override;
     void max(const CUDANet::Tensor& input, CUDANet::Tensor& max) override;
 
@@ -147,6 +151,9 @@ class CUDA : public Backend {
 
     template <typename T>
     void copy_to_device_impl(CUDANet::Tensor& tensor, void* data, size_t size);
+
+    template <typename T>
+    void copy_to_host_impl(CUDANet::Tensor& tensor, void* data);
 
     template <typename T>
     void sum_impl(const CUDANet::Tensor& input, CUDANet::Tensor& sum);
