@@ -20,4 +20,4 @@ set_property(TARGET test_main PROPERTY CXX_STANDARD 20)
 target_include_directories(test_main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(test_main ${GTEST_BOTH_LIBRARIES} CUDANet)
 
-add_test(NAME TestMain COMMAND test_main)
+add_test(NAME TestMain COMMAND test_main WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

@@ -3,7 +3,7 @@
 
 #include "test_utils.hpp"
 
-const std::string FIXTURES_PATH="matmul";
+const std::string FIXTURES_PATH="fixtures/matmul";
 
 struct MatMulParams
 {
@@ -72,7 +72,7 @@ TEST_P(MatVecMulTest, MatrixVectorMultiplication) {
 }
 
 std::vector<MatMulParams> initialize_params() {
-    std::vector<std::vector<std::string>> rows = load_csv("matmul/metadata.csv");
+    std::vector<std::vector<std::string>> rows = load_csv(FIXTURES_PATH + "/metadata.csv");
 
     std::vector<MatMulParams> params;
 
