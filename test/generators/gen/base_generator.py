@@ -30,4 +30,4 @@ class BaseGenerator(ABC):
     @staticmethod
     def save_metadata(metadata: list[list[str]], path: str) -> None:
         with open(path, 'w', newline='') as f:
-            csv.writer(f).writerows(metadata)
+            csv.writer(f, lineterminator='\n').writerows(metadata)
