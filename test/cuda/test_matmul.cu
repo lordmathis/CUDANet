@@ -48,8 +48,8 @@ void run_matmul_test(const MatMulParams params) {
         static_cast<const T*>(matrix.device_ptr()),
         static_cast<const T*>(vector.device_ptr()),
         static_cast<T*>(output.device_ptr()),
-        params.rows,
-        params.cols
+        params.cols,
+        params.rows
     );
 
     std::vector<T> h_output = output.to_host<T>();
