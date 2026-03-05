@@ -56,6 +56,7 @@ void run_mat_vec_mul_test(const MatVecMulParams params) {
         params.cols,
         params.rows
     );
+    cudaDeviceSynchronize();
 
     std::vector<T> h_output = output.to_host<T>();
     std::vector<T> h_expected = expected.to_host<T>();
@@ -157,6 +158,7 @@ void run_vec_vec_add_test(const VecVecAddParams params) {
         static_cast<T*>(output.device_ptr()),
         params.size
     );
+    cudaDeviceSynchronize();
 
     std::vector<T> h_output = output.to_host<T>();
     std::vector<T> h_expected = expected.to_host<T>();
