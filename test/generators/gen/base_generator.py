@@ -1,5 +1,6 @@
 import csv
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -14,7 +15,7 @@ _TORCH_TO_NUMPY: dict[torch.dtype, np.dtype] = {
 class BaseGenerator(ABC):
 
     def __init__(self, seed, fixtures_path):
-        self.fixtures_path = fixtures_path
+        self.fixtures_path = Path(fixtures_path)
 
         torch.manual_seed(seed)
 

@@ -8,6 +8,8 @@
 #include <type_traits>
 #include <limits>
 
+const std::string FIXTURE_PATH="fixtures";
+
 inline std::vector<std::vector<std::string>> load_csv(const std::string& path)
 {
     std::ifstream file(path);

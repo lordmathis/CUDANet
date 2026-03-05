@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 
 import torch
@@ -8,28 +9,32 @@ class MatMulGenerator(BaseGenerator):
             
     def __init__(self, seed, fixtures_path):
         super().__init__(seed, fixtures_path)
-        os.makedirs(self.fixtures_path, exist_ok=True)
 
     def generate(self):
+        self._generate_mat_vec_mul(self.fixtures_path / "mat_vec_mul")
+
+    def _generate_mat_vec_mul(self, save_path):
+        os.makedirs(save_path, exist_ok=True)
+
         i = 0
         metadata = []
         for (rows, cols) in [(10, 5), (128, 64), (512, 256)]:
             for dtype in ['float32']:
 
                 matrix = torch.randn(rows, cols)
-                matrix_filename = f"{i}_matrix.bin"
-                self.save_tensor(matrix, f"{self.fixtures_path}/{matrix_filename}")
+                matrix_save_path = save_path / f"{i}_matrix.bin"
+                self.save_tensor(matrix, matrix_save_path)
 
                 vector = torch.randn(cols)
-                vector_filename = f"{i}_vector.bin"
-                self.save_tensor(vector, f"{self.fixtures_path}/{vector_filename}")
+                vector_save_path = save_path / f"{i}_vector.bin"
+                self.save_tensor(vector, vector_save_path)
 
                 expected = torch.matmul(matrix, vector)
-                expected_filename = f"{i}_expected.bin"
-                self.save_tensor(expected, f"{self.fixtures_path}/{expected_filename}")
+                expected_save_path = save_path / f"{i}_expected.bin"
+                self.save_tensor(expected, expected_save_path)
 
-                metadata.append([dtype, str(rows), str(cols), matrix_filename, vector_filename, expected_filename])
+                metadata.append([dtype, str(rows), str(cols), matrix_save_path, vector_save_path, expected_save_path])
                 
                 i += 1
 
-        self.save_metadata(metadata, f"{self.fixtures_path}/metadata.csv")
+        self.save_metadata(metadata, save_path / "metadata.csv")

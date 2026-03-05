@@ -3,9 +3,7 @@
 
 #include "test_utils.hpp"
 
-const std::string FIXTURES_PATH="fixtures/matmul";
-
-struct MatMulParams
+struct MatVecMulParams
 {
     CUDANet::DType dtype;
     const size_t rows;
@@ -15,14 +13,14 @@ struct MatMulParams
     std::string expected_path;
 };
 
-class MatVecMulTest : public ::testing::TestWithParam<MatMulParams> {};
+class MatVecMulTest : public ::testing::TestWithParam<MatVecMulParams> {};
 
 template<typename T>
-void run_matmul_test(const MatMulParams params) {
+void run_mat_vec_mul_test(const MatVecMulParams params) {
     // Load binary data
-    auto matrix_data = load_binary<T>(FIXTURES_PATH + "/" + params.matrix_path);
-    auto vector_data = load_binary<T>(FIXTURES_PATH + "/" + params.vector_path);
-    auto expected_data = load_binary<T>(FIXTURES_PATH + "/" + params.expected_path);
+    auto matrix_data = load_binary<T>(params.matrix_path);
+    auto vector_data = load_binary<T>(params.vector_path);
+    auto expected_data = load_binary<T>(params.expected_path);
 
     auto backend = CUDANet::BackendFactory::create(CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig());
 
@@ -60,21 +58,21 @@ void run_matmul_test(const MatMulParams params) {
     assert_elements_near(h_output, h_expected);
 }
 
-template void run_matmul_test<float>(const MatMulParams params);
+template void run_mat_vec_mul_test<float>(const MatVecMulParams params);
 
 TEST_P(MatVecMulTest, MatrixVectorMultiplication) {  
     auto param = GetParam(); 
 
     // DType dispatch
     if (param.dtype == CUDANet::DType::FLOAT32) {
-        run_matmul_test<float>(param);
+        run_mat_vec_mul_test<float>(param);
     }
 }
 
-std::vector<MatMulParams> initialize_params() {
-    std::vector<std::vector<std::string>> rows = load_csv(FIXTURES_PATH + "/metadata.csv");
+std::vector<MatVecMulParams> initialize_params() {
+    std::vector<std::vector<std::string>> rows = load_csv(FIXTURE_PATH + "/matmul/mat_vec_mul/metadata.csv");
 
-    std::vector<MatMulParams> params;
+    std::vector<MatVecMulParams> params;
 
     for (const auto& row : rows) {
         CUDANet::DType dtype = (row[0] == "float32")
@@ -84,7 +82,7 @@ std::vector<MatMulParams> initialize_params() {
         size_t rows = std::stoul(row[1]);
         size_t cols = std::stoul(row[2]);
 
-        params.push_back(MatMulParams{
+        params.push_back(MatVecMulParams{
             dtype,
             rows,
             cols,
