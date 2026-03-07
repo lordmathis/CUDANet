@@ -373,3 +373,84 @@ INSTANTIATE_TEST_SUITE_P(
     VecVecMulTest,  
     testing::ValuesIn(initialize_vec_vec_mul_params())
 );
+
+/*
+
+Vec Scalar Sub
+
+*/
+
+struct VecScalarSubParams
+{
+    CUDANet::DType dtype;
+    const size_t size;
+    std::string vector_path;
+    std::string scalar_path;
+    std::string expected_path;
+};
+
+class VecScalarSubTest : public ::testing::TestWithParam<VecScalarSubParams> {};
+
+template<typename T>
+void run_vec_scalar_sub_test(const VecScalarSubParams params) {
+    auto vector_data = load_binary<T>(params.vector_path);
+    auto scalar_data = load_binary<T>(params.scalar_path);
+    auto expected_data = load_binary<T>(params.expected_path);
+
+    auto backend = create_backend();
+
+    auto vector_shape = CUDANet::Shape{params.size};
+
+    auto vector = create_tensor<T>(vector_shape, params.dtype, backend.get(), vector_data);
+    auto scalar = create_tensor<T>(CUDANet::Shape{1}, params.dtype, backend.get(), scalar_data);
+    auto expected = create_tensor<T>(vector_shape, params.dtype, backend.get(), expected_data);
+    auto output = create_output_tensor<T>(vector_shape, params.dtype, backend.get());
+
+    auto grid_size = calc_grid_size(params.size);
+
+    CUDANet::Kernels::vec_scalar_sub<<<grid_size, BLOCK_SIZE>>>(
+        static_cast<const T*>(vector.device_ptr()),
+        static_cast<T*>(output.device_ptr()),
+        static_cast<const T*>(scalar.device_ptr()),
+        params.size
+    );
+
+    verify_output<T>(output, expected);
+}
+
+template void run_vec_scalar_sub_test<float>(const VecScalarSubParams params);
+
+TEST_P(VecScalarSubTest, VectorScalarSubtraction) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_vec_scalar_sub_test<float>(param);
+    }
+}
+
+std::vector<VecScalarSubParams> initialize_vec_scalar_sub_params() {
+    std::vector<std::vector<std::string>> rows = load_csv(FIXTURE_PATH + "/matmul/vec_scalar_sub/metadata.csv");
+
+    std::vector<VecScalarSubParams> params;
+
+    for (const auto& row : rows) {
+        CUDANet::DType dtype = parse_dtype(row);
+
+        size_t size = std::stoul(row[1]);
+
+        params.push_back(VecScalarSubParams{
+            dtype,
+            size,
+            row[2],
+            row[3],
+            row[4]
+        });
+    }
+
+    return params;
+}
+
+INSTANTIATE_TEST_SUITE_P(  
+    VecScalarSubTestCases,  
+    VecScalarSubTest,  
+    testing::ValuesIn(initialize_vec_scalar_sub_params())
+);
