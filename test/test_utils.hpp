@@ -8,6 +8,10 @@
 #include <type_traits>
 #include <limits>
 
+#ifndef BLOCK_SIZE
+#define BLOCK_SIZE 128
+#endif  // BLOCK_SIZE
+
 const std::string FIXTURE_PATH="fixtures";
 
 inline std::vector<std::vector<std::string>> load_csv(const std::string& path)
