@@ -4,36 +4,41 @@
 #include "test_utils.hpp"
 
 
-#define CREATE_BACKEND() \
-    CUDANet::BackendFactory::create(CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig())
+inline auto create_backend() {
+    return CUDANet::BackendFactory::create(CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig());
+}
 
-#define CREATE_TENSOR(name, shape, dtype, backend, data) \
-    auto name = CUDANet::Tensor(shape, dtype, backend.get()); \
-    name.set_data(data.data())
+template<typename T>
+inline CUDANet::Tensor create_tensor(const CUDANet::Shape& shape, CUDANet::DType dtype, CUDANet::Backend* backend, const std::vector<T>& data) {
+    auto tensor = CUDANet::Tensor(shape, dtype, backend);
+    tensor.set_data(static_cast<void*>(const_cast<T*>(data.data())));
+    return tensor;
+}
 
-#define CREATE_OUTPUT_TENSOR(name, shape, dtype, backend) \
-    auto name = CUDANet::Tensor(shape, dtype, backend.get()); \
-    name.zero()
+template<typename T>
+inline CUDANet::Tensor create_output_tensor(const CUDANet::Shape& shape, CUDANet::DType dtype, CUDANet::Backend* backend) {
+    auto tensor = CUDANet::Tensor(shape, dtype, backend);
+    tensor.zero();
+    return tensor;
+}
 
-#define GRID_SIZE(size) ((size + BLOCK_SIZE - 1) / BLOCK_SIZE)
+inline size_t calc_grid_size(size_t size) {
+    return (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
+}
 
-#define PARSE_DTYPE(row) \
-    ((row[0] == "float32") ? CUDANet::DType::FLOAT32 : throw std::runtime_error("Unknown dtype: " + row[0]))
+inline CUDANet::DType parse_dtype(const std::vector<std::string>& row) {
+    if (row[0] == "float32") return CUDANet::DType::FLOAT32;
+    throw std::runtime_error("Unknown dtype: " + row[0]);
+}
 
-#define VERIFY_OUTPUT(output, expected) \
-    cudaDeviceSynchronize(); \
-    auto h_output = output.to_host<T>(); \
-    auto h_expected = expected.to_host<T>(); \
-    ASSERT_EQ(h_output.size(), h_expected.size()); \
-    assert_elements_near(h_output, h_expected)
-
-#define DEFINE_TEST(ParamsType, TestName, RunFn) \
-    TEST_P(ParamsType, TestName) { \
-        auto param = GetParam(); \
-        if (param.dtype == CUDANet::DType::FLOAT32) { \
-            RunFn<float>(param); \
-        } \
-    }
+template<typename T>
+inline void verify_output(CUDANet::Tensor& output, CUDANet::Tensor& expected) {
+    cudaDeviceSynchronize();
+    auto h_output = output.to_host<T>();
+    auto h_expected = expected.to_host<T>();
+    ASSERT_EQ(h_output.size(), h_expected.size());
+    assert_elements_near(h_output, h_expected);
+}
 
 
 /*
@@ -61,20 +66,20 @@ void run_mat_vec_mul_test(const MatVecMulParams params) {
     auto vector_data = load_binary<T>(params.vector_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
-    auto backend = CREATE_BACKEND();
+    auto backend = create_backend();
 
     auto matrix_shape = CUDANet::Shape{params.rows, params.cols};
-    CREATE_TENSOR(matrix, matrix_shape, params.dtype, backend, matrix_data);
+    auto matrix = create_tensor<T>(matrix_shape, params.dtype, backend.get(), matrix_data);
 
     auto vector_shape = CUDANet::Shape{params.cols};
-    CREATE_TENSOR(vector, vector_shape, params.dtype, backend, vector_data);
+    auto vector = create_tensor<T>(vector_shape, params.dtype, backend.get(), vector_data);
 
     auto expected_shape = CUDANet::Shape{params.rows};
-    CREATE_TENSOR(expected, expected_shape, params.dtype, backend, expected_data);
+    auto expected = create_tensor<T>(expected_shape, params.dtype, backend.get(), expected_data);
 
-    CREATE_OUTPUT_TENSOR(output, expected_shape, params.dtype, backend);
+    auto output = create_output_tensor<T>(expected_shape, params.dtype, backend.get());
 
-    auto grid_size = GRID_SIZE(std::max(params.rows, params.cols));
+    auto grid_size = calc_grid_size(std::max(params.rows, params.cols));
 
     CUDANet::Kernels::mat_vec_mul<<<grid_size, BLOCK_SIZE>>>(
         static_cast<const T*>(matrix.device_ptr()),
@@ -84,12 +89,17 @@ void run_mat_vec_mul_test(const MatVecMulParams params) {
         params.rows
     );
 
-    VERIFY_OUTPUT(output, expected);
+    verify_output<T>(output, expected);
 }
 
 template void run_mat_vec_mul_test<float>(const MatVecMulParams params);
 
-DEFINE_TEST(MatVecMulTest, MatrixVectorMultiplication, run_mat_vec_mul_test);
+TEST_P(MatVecMulTest, MatrixVectorMultiplication) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_mat_vec_mul_test<float>(param);
+    }
+}
 
 std::vector<MatVecMulParams> initialize_mat_vec_mul_params() {
     std::vector<std::vector<std::string>> rows = load_csv(FIXTURE_PATH + "/matmul/mat_vec_mul/metadata.csv");
@@ -97,7 +107,7 @@ std::vector<MatVecMulParams> initialize_mat_vec_mul_params() {
     std::vector<MatVecMulParams> params;
 
     for (const auto& row : rows) {
-        CUDANet::DType dtype = PARSE_DTYPE(row);
+        CUDANet::DType dtype = parse_dtype(row);
 
         size_t rows = std::stoul(row[1]);
         size_t cols = std::stoul(row[2]);
@@ -144,16 +154,16 @@ void run_vec_vec_add_test(const VecVecAddParams params) {
     auto vector_b_data = load_binary<T>(params.vec_b_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
-    auto backend = CREATE_BACKEND();
+    auto backend = create_backend();
 
     auto vector_shape = CUDANet::Shape{params.size};
 
-    CREATE_TENSOR(vector_a, vector_shape, params.dtype, backend, vector_a_data);
-    CREATE_TENSOR(vector_b, vector_shape, params.dtype, backend, vector_b_data);
-    CREATE_TENSOR(expected, vector_shape, params.dtype, backend, expected_data);
-    CREATE_OUTPUT_TENSOR(output, vector_shape, params.dtype, backend);
+    auto vector_a = create_tensor<T>(vector_shape, params.dtype, backend.get(), vector_a_data);
+    auto vector_b = create_tensor<T>(vector_shape, params.dtype, backend.get(), vector_b_data);
+    auto expected = create_tensor<T>(vector_shape, params.dtype, backend.get(), expected_data);
+    auto output = create_output_tensor<T>(vector_shape, params.dtype, backend.get());
 
-    auto grid_size = GRID_SIZE(params.size);
+    auto grid_size = calc_grid_size(params.size);
 
     CUDANet::Kernels::vec_vec_add<<<grid_size, BLOCK_SIZE>>>(
         static_cast<const T*>(vector_a.device_ptr()),
@@ -162,12 +172,17 @@ void run_vec_vec_add_test(const VecVecAddParams params) {
         params.size
     );
 
-    VERIFY_OUTPUT(output, expected);
+    verify_output<T>(output, expected);
 }
 
 template void run_vec_vec_add_test<float>(const VecVecAddParams params);
 
-DEFINE_TEST(VecVecAddTest, VectorVectorAddition, run_vec_vec_add_test);
+TEST_P(VecVecAddTest, VectorVectorAddition) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_vec_vec_add_test<float>(param);
+    }
+}
 
 std::vector<VecVecAddParams> initialize_vec_vec_add_params() {
     std::vector<std::vector<std::string>> rows = load_csv(FIXTURE_PATH + "/matmul/vec_vec_add/metadata.csv");
@@ -175,7 +190,7 @@ std::vector<VecVecAddParams> initialize_vec_vec_add_params() {
     std::vector<VecVecAddParams> params;
 
     for (const auto& row : rows) {
-        CUDANet::DType dtype = PARSE_DTYPE(row);
+        CUDANet::DType dtype = parse_dtype(row);
 
         size_t size = std::stoul(row[1]);
 
@@ -220,16 +235,16 @@ void run_vec_vec_sub_test(const VecVecSubParams params) {
     auto vector_b_data = load_binary<T>(params.vec_b_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
-    auto backend = CREATE_BACKEND();
+    auto backend = create_backend();
 
     auto vector_shape = CUDANet::Shape{params.size};
 
-    CREATE_TENSOR(vector_a, vector_shape, params.dtype, backend, vector_a_data);
-    CREATE_TENSOR(vector_b, vector_shape, params.dtype, backend, vector_b_data);
-    CREATE_TENSOR(expected, vector_shape, params.dtype, backend, expected_data);
-    CREATE_OUTPUT_TENSOR(output, vector_shape, params.dtype, backend);
+    auto vector_a = create_tensor<T>(vector_shape, params.dtype, backend.get(), vector_a_data);
+    auto vector_b = create_tensor<T>(vector_shape, params.dtype, backend.get(), vector_b_data);
+    auto expected = create_tensor<T>(vector_shape, params.dtype, backend.get(), expected_data);
+    auto output = create_output_tensor<T>(vector_shape, params.dtype, backend.get());
 
-    auto grid_size = GRID_SIZE(params.size);
+    auto grid_size = calc_grid_size(params.size);
 
     CUDANet::Kernels::vec_vec_sub<<<grid_size, BLOCK_SIZE>>>(
         static_cast<const T*>(vector_a.device_ptr()),
@@ -238,12 +253,17 @@ void run_vec_vec_sub_test(const VecVecSubParams params) {
         params.size
     );
 
-    VERIFY_OUTPUT(output, expected);
+    verify_output<T>(output, expected);
 }
 
 template void run_vec_vec_sub_test<float>(const VecVecSubParams params);
 
-DEFINE_TEST(VecVecSubTest, VectorVectorSubtraction, run_vec_vec_sub_test);
+TEST_P(VecVecSubTest, VectorVectorSubtraction) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_vec_vec_sub_test<float>(param);
+    }
+}
 
 std::vector<VecVecSubParams> initialize_vec_vec_sub_params() {
     std::vector<std::vector<std::string>> rows = load_csv(FIXTURE_PATH + "/matmul/vec_vec_sub/metadata.csv");
@@ -251,7 +271,7 @@ std::vector<VecVecSubParams> initialize_vec_vec_sub_params() {
     std::vector<VecVecSubParams> params;
 
     for (const auto& row : rows) {
-        CUDANet::DType dtype = PARSE_DTYPE(row);
+        CUDANet::DType dtype = parse_dtype(row);
 
         size_t size = std::stoul(row[1]);
 
@@ -296,16 +316,16 @@ void run_vec_vec_mul_test(const VecVecMulParams params) {
     auto vector_b_data = load_binary<T>(params.vec_b_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
-    auto backend = CREATE_BACKEND();
+    auto backend = create_backend();
 
     auto vector_shape = CUDANet::Shape{params.size};
 
-    CREATE_TENSOR(vector_a, vector_shape, params.dtype, backend, vector_a_data);
-    CREATE_TENSOR(vector_b, vector_shape, params.dtype, backend, vector_b_data);
-    CREATE_TENSOR(expected, vector_shape, params.dtype, backend, expected_data);
-    CREATE_OUTPUT_TENSOR(output, vector_shape, params.dtype, backend);
+    auto vector_a = create_tensor<T>(vector_shape, params.dtype, backend.get(), vector_a_data);
+    auto vector_b = create_tensor<T>(vector_shape, params.dtype, backend.get(), vector_b_data);
+    auto expected = create_tensor<T>(vector_shape, params.dtype, backend.get(), expected_data);
+    auto output = create_output_tensor<T>(vector_shape, params.dtype, backend.get());
 
-    auto grid_size = GRID_SIZE(params.size);
+    auto grid_size = calc_grid_size(params.size);
 
     CUDANet::Kernels::vec_vec_mul<<<grid_size, BLOCK_SIZE>>>(
         static_cast<const T*>(vector_a.device_ptr()),
@@ -314,12 +334,17 @@ void run_vec_vec_mul_test(const VecVecMulParams params) {
         params.size
     );
 
-    VERIFY_OUTPUT(output, expected);
+    verify_output<T>(output, expected);
 }
 
 template void run_vec_vec_mul_test<float>(const VecVecMulParams params);
 
-DEFINE_TEST(VecVecMulTest, VectorVectorMultiplication, run_vec_vec_mul_test);
+TEST_P(VecVecMulTest, VectorVectorMultiplication) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_vec_vec_mul_test<float>(param);
+    }
+}
 
 std::vector<VecVecMulParams> initialize_vec_vec_mul_params() {
     std::vector<std::vector<std::string>> rows = load_csv(FIXTURE_PATH + "/matmul/vec_vec_mul/metadata.csv");
@@ -327,7 +352,7 @@ std::vector<VecVecMulParams> initialize_vec_vec_mul_params() {
     std::vector<VecVecMulParams> params;
 
     for (const auto& row : rows) {
-        CUDANet::DType dtype = PARSE_DTYPE(row);
+        CUDANet::DType dtype = parse_dtype(row);
 
         size_t size = std::stoul(row[1]);
 
