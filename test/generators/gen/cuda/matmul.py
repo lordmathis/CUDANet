@@ -48,6 +48,9 @@ class MatMulGenerator(BaseGenerator):
         self._generate_vec_scale_tests(
             self.fixtures_path / "vec_scale", [5, 512, 1024]
         )
+        self._generate_max_reduce(
+            self.fixtures_path / "max_reduce", [5, 128, 512, 1024]
+        )
 
     def _generate_mat_vec_mul(self, save_path):
         os.makedirs(save_path, exist_ok=True)
@@ -211,6 +214,39 @@ class MatMulGenerator(BaseGenerator):
                     ]
                 )
 
+                i += 1
+
+        self.save_metadata(metadata, save_path / "metadata.csv")
+
+    def _generate_max_reduce(self, save_path, sizes):
+        os.makedirs(save_path, exist_ok=True)
+        block_size = 128
+        i = 0
+        metadata = []
+        for size in sizes:
+            for dtype in ["float32"]:
+                vector = torch.randn(size)
+                vector_save_path = save_path / f"{i}_vector.bin"
+                self.save_tensor(vector, vector_save_path)
+
+                num_blocks = (size + block_size - 1) // block_size
+                expected = torch.zeros(num_blocks)
+                for b in range(num_blocks):
+                    start = b * block_size
+                    end = min((b + 1) * block_size, size)
+                    expected[b] = torch.max(vector[start:end])
+
+                expected_save_path = save_path / f"{i}_expected.bin"
+                self.save_tensor(expected, expected_save_path)
+
+                metadata.append(
+                    [
+                        dtype,
+                        str(size),
+                        vector_save_path,
+                        expected_save_path,
+                    ]
+                )
                 i += 1
 
         self.save_metadata(metadata, save_path / "metadata.csv")

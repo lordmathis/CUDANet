@@ -957,3 +957,72 @@ INSTANTIATE_TEST_SUITE_P(
 Max Reduce
 
 */
+
+struct MaxReduceParams {
+    CUDANet::DType dtype;
+    const size_t   size;
+    std::string    vector_path;
+    std::string    expected_path;
+};
+
+class MaxReduceTest : public ::testing::TestWithParam<MaxReduceParams> {};
+
+template <typename T>
+void run_max_reduce_test(const MaxReduceParams params) {
+    auto vector_data   = load_binary<T>(params.vector_path);
+    auto expected_data = load_binary<T>(params.expected_path);
+
+    auto backend = create_backend();
+
+    auto vector_shape = CUDANet::Shape{params.size};
+    auto vector       = create_tensor<T>(
+        vector_shape, params.dtype, backend.get(), vector_data
+    );
+
+    size_t num_blocks      = calc_grid_size(params.size);
+    auto   expected_shape = CUDANet::Shape{num_blocks};
+    auto   expected       = create_tensor<T>(
+        expected_shape, params.dtype, backend.get(), expected_data
+    );
+    auto output =
+        create_output_tensor<T>(expected_shape, params.dtype, backend.get());
+
+    CUDANet::Kernels::max_reduce<<<num_blocks, BLOCK_SIZE>>>(
+        static_cast<const T*>(vector.device_ptr()),
+        static_cast<T*>(output.device_ptr()), params.size
+    );
+
+    verify_output<T>(output, expected);
+}
+
+template void run_max_reduce_test<float>(const MaxReduceParams params);
+
+TEST_P(MaxReduceTest, MaximumReduction) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_max_reduce_test<float>(param);
+    }
+}
+
+std::vector<MaxReduceParams> initialize_max_reduce_params() {
+    std::vector<std::vector<std::string>> rows =
+        load_csv(FIXTURE_PATH + "/matmul/max_reduce/metadata.csv");
+
+    std::vector<MaxReduceParams> params;
+
+    for (const auto& row : rows) {
+        CUDANet::DType dtype = parse_dtype(row);
+
+        size_t size = std::stoul(row[1]);
+
+        params.push_back(MaxReduceParams{dtype, size, row[2], row[3]});
+    }
+
+    return params;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    MaxReduceTestCases,
+    MaxReduceTest,
+    testing::ValuesIn(initialize_max_reduce_params())
+);
