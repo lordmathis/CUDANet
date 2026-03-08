@@ -15,33 +15,33 @@ class MatMulGenerator(BaseGenerator):
 
         # vector vector ops tests
         self._generate_vec_vec_op(
-            self.fixtures_path / "vec_vec_add", [5, 512, 1024], torch.add
+            self.fixtures_path / "vec_vec_add", [5, 128, 512, 1024], torch.add
         )
         self._generate_vec_vec_op(
-            self.fixtures_path / "vec_vec_sub", [5, 512, 1024], torch.sub
+            self.fixtures_path / "vec_vec_sub", [5, 128, 512, 1024], torch.sub
         )
         self._generate_vec_vec_op(
-            self.fixtures_path / "vec_vec_mul", [5, 512, 1024], torch.mul
+            self.fixtures_path / "vec_vec_mul", [5, 128, 512, 1024], torch.mul
         )
 
         # vector scalar ops tests
         self._generate_vec_scalar_op(
-            self.fixtures_path / "vec_scalar_sub", [5, 512, 1024], torch.sub
+            self.fixtures_path / "vec_scalar_sub", [5, 128, 512, 1024], torch.sub
         )
         self._generate_vec_scalar_op(
-            self.fixtures_path / "vec_scalar_add", [5, 512, 1024], torch.add
+            self.fixtures_path / "vec_scalar_add", [5, 128, 512, 1024], torch.add
         )
         self._generate_vec_scalar_op(
-            self.fixtures_path / "vec_scalar_div", [5, 512, 1024], torch.div
+            self.fixtures_path / "vec_scalar_div", [5, 128, 512, 1024], torch.div
         )
         self._generate_vec_scalar_op(
-            self.fixtures_path / "vec_scalar_mul", [5, 512, 1024], torch.mul
+            self.fixtures_path / "vec_scalar_mul", [5, 128, 512, 1024], torch.mul
         )
 
         # vector ops tests
-        self._generate_vec_op(self.fixtures_path / "vec_exp", [5, 512, 1024], torch.exp)
+        self._generate_vec_op(self.fixtures_path / "vec_exp", [5, 128, 512, 1024], torch.exp)
         self._generate_vec_op(
-            self.fixtures_path / "vec_sqrt", [5, 512, 1024], torch.sqrt
+            self.fixtures_path / "vec_sqrt", [5, 128, 512, 1024], torch.sqrt
         )
         self._generate_vec_scale_tests(self.fixtures_path / "vec_scale", [5, 512, 1024])
         self._generate_max_reduce(
@@ -59,7 +59,7 @@ class MatMulGenerator(BaseGenerator):
 
         i = 0
         metadata = []
-        for rows, cols in [(10, 5), (128, 64), (512, 256)]:
+        for rows, cols in [(10, 5), (128, 64), (512, 256), (1024, 512)]:
             for dtype in ["float32"]:
                 matrix = torch.randn(rows, cols)
                 matrix_save_path = save_path / f"{i}_matrix.bin"
