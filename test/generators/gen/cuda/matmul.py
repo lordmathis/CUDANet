@@ -38,6 +38,11 @@ class MatMulGenerator(BaseGenerator):
             self.fixtures_path / "vec_scalar_mul", [5, 512, 1024], torch.mul
         )
 
+        # vector ops tests
+        self._generate_vec_op(
+            self.fixtures_path / "vec_exp", [5, 512, 1024], torch.exp
+        )
+
     def _generate_mat_vec_mul(self, save_path):
         os.makedirs(save_path, exist_ok=True)
 
@@ -130,6 +135,34 @@ class MatMulGenerator(BaseGenerator):
                         str(size),
                         vector_save_path,
                         scalar_save_path,
+                        expected_save_path,
+                    ]
+                )
+
+                i += 1
+
+        self.save_metadata(metadata, save_path / "metadata.csv")
+
+    def _generate_vec_op(self, save_path, sizes, torch_op):
+        os.makedirs(save_path, exist_ok=True)
+
+        i = 0
+        metadata = []
+        for size in sizes:
+            for dtype in ["float32"]:
+                vector = torch.rand(size)
+                vector_save_path = save_path / f"{i}_vector.bin"
+                self.save_tensor(vector, vector_save_path)
+
+                expected = torch_op(vector)
+                expected_save_path = save_path / f"{i}_expected.bin"
+                self.save_tensor(expected, expected_save_path)
+
+                metadata.append(
+                    [
+                        dtype,
+                        str(size),
+                        vector_save_path,
                         expected_save_path,
                     ]
                 )

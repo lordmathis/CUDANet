@@ -712,3 +712,81 @@ INSTANTIATE_TEST_SUITE_P(
     VecScalarMulTest,
     testing::ValuesIn(initialize_vec_scalar_mul_params())
 );
+
+/*
+
+Vec Exp
+
+*/
+
+struct VecExpParams {
+    CUDANet::DType dtype;
+    const size_t   size;
+    std::string    vector_path;
+    std::string    expected_path;
+};
+
+class VecExpTest : public ::testing::TestWithParam<VecExpParams> {};
+
+template <typename T>
+void run_vec_exp_test(const VecExpParams params) {
+    auto vector_data   = load_binary<T>(params.vector_path);
+    auto expected_data = load_binary<T>(params.expected_path);
+
+    auto backend = create_backend();
+
+    auto vector_shape = CUDANet::Shape{params.size};
+
+    auto vector = create_tensor<T>(
+        vector_shape, params.dtype, backend.get(), vector_data
+    );
+    auto expected = create_tensor<T>(
+        vector_shape, params.dtype, backend.get(), expected_data
+    );
+    auto output =
+        create_output_tensor<T>(vector_shape, params.dtype, backend.get());
+
+    auto grid_size = calc_grid_size(params.size);
+
+    CUDANet::Kernels::vec_exp<<<grid_size, BLOCK_SIZE>>>(
+        static_cast<const T*>(vector.device_ptr()),
+        static_cast<T*>(output.device_ptr()),
+        params.size
+    );
+
+    verify_output<T>(output, expected);
+}
+
+template void run_vec_exp_test<float>(const VecExpParams params);
+
+TEST_P(VecExpTest, VectorExponentiation) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_vec_exp_test<float>(param);
+    }
+}
+
+std::vector<VecExpParams> initialize_vec_exp_params() {
+    std::vector<std::vector<std::string>> rows =
+        load_csv(FIXTURE_PATH + "/matmul/vec_exp/metadata.csv");
+
+    std::vector<VecExpParams> params;
+
+    for (const auto& row : rows) {
+        CUDANet::DType dtype = parse_dtype(row);
+
+        size_t size = std::stoul(row[1]);
+
+        params.push_back(
+            VecExpParams{dtype, size, row[2], row[3]}
+        );
+    }
+
+    return params;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    VecExpTestCases,
+    VecExpTest,
+    testing::ValuesIn(initialize_vec_exp_params())
+);
