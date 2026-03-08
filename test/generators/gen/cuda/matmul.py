@@ -34,6 +34,9 @@ class MatMulGenerator(BaseGenerator):
         self._generate_vec_scalar_op(
             self.fixtures_path / "vec_scalar_div", [5, 512, 1024], torch.div
         )
+        self._generate_vec_scalar_op(
+            self.fixtures_path / "vec_scalar_mul", [5, 512, 1024], torch.mul
+        )
 
     def _generate_mat_vec_mul(self, save_path):
         os.makedirs(save_path, exist_ok=True)
