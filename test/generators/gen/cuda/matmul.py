@@ -45,6 +45,9 @@ class MatMulGenerator(BaseGenerator):
         self._generate_vec_op(
             self.fixtures_path / "vec_sqrt", [5, 512, 1024], torch.sqrt
         )
+        self._generate_vec_scale_tests(
+            self.fixtures_path / "vec_scale", [5, 512, 1024]
+        )
 
     def _generate_mat_vec_mul(self, save_path):
         os.makedirs(save_path, exist_ok=True)
@@ -166,6 +169,44 @@ class MatMulGenerator(BaseGenerator):
                         dtype,
                         str(size),
                         vector_save_path,
+                        expected_save_path,
+                    ]
+                )
+
+                i += 1
+
+        self.save_metadata(metadata, save_path / "metadata.csv")
+
+    def _generate_vec_scale_tests(self, save_path, sizes):
+        os.makedirs(save_path, exist_ok=True)
+
+        i = 0
+        metadata = []
+        for size in sizes:
+            for dtype in ["float32"]:
+                vector = torch.rand(size)
+                vector_save_path = save_path / f"{i}_vector.bin"
+                self.save_tensor(vector, vector_save_path)
+
+                scale = torch.rand(1)
+                scale_save_path = save_path / f"{i}_scale.bin"
+                self.save_tensor(scale, scale_save_path)
+
+                epsilon = torch.tensor([1e-5])
+                epsilon_save_path = save_path / f"{i}_epsilon.bin"
+                self.save_tensor(epsilon, epsilon_save_path)
+
+                expected = vector * torch.rsqrt(scale + epsilon)
+                expected_save_path = save_path / f"{i}_expected.bin"
+                self.save_tensor(expected, expected_save_path)
+
+                metadata.append(
+                    [
+                        dtype,
+                        str(size),
+                        vector_save_path,
+                        scale_save_path,
+                        epsilon_save_path,
                         expected_save_path,
                     ]
                 )

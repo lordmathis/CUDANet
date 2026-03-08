@@ -868,3 +868,92 @@ INSTANTIATE_TEST_SUITE_P(
     VecSqrtTest,
     testing::ValuesIn(initialize_vec_sqrt_params())
 );
+
+/*
+
+Vec Scale
+
+*/
+
+struct VecScaleParams {
+    CUDANet::DType dtype;
+    const size_t   size;
+    std::string    vector_path;
+    std::string    scale_path;
+    std::string    epsilon_path;
+    std::string    expected_path;
+};
+
+class VecScaleTest : public ::testing::TestWithParam<VecScaleParams> {};
+
+template <typename T>
+void run_vec_scale_test(const VecScaleParams params) {
+    auto vector_data   = load_binary<T>(params.vector_path);
+    auto scale_data = load_binary<T>(params.scale_path);
+    auto epsilon_data   = load_binary<T>(params.epsilon_path);
+    auto expected_data = load_binary<T>(params.expected_path);
+
+    auto backend = create_backend();
+
+    auto vector_shape = CUDANet::Shape{params.size};
+
+    auto vector = create_tensor<T>(
+        vector_shape, params.dtype, backend.get(), vector_data
+    );
+    auto scale = create_tensor<T>(
+        CUDANet::Shape{1}, params.dtype, backend.get(), scale_data
+    );
+    auto epsilon = create_tensor<T>(
+        CUDANet::Shape{1}, params.dtype, backend.get(), epsilon_data
+    );
+    auto expected = create_tensor<T>(
+        vector_shape, params.dtype, backend.get(), expected_data
+    );
+    auto output =
+        create_output_tensor<T>(vector_shape, params.dtype, backend.get());
+
+    auto grid_size = calc_grid_size(params.size);
+
+    CUDANet::Kernels::vec_scale<<<grid_size, BLOCK_SIZE>>>(
+        static_cast<const T*>(vector.device_ptr()),
+        static_cast<T*>(output.device_ptr()),
+        static_cast<const T*>(scale.device_ptr()),
+        static_cast<const T*>(epsilon.device_ptr()), params.size
+    );
+
+    verify_output<T>(output, expected);
+}
+
+template void run_vec_scale_test<float>(const VecScaleParams params);
+
+TEST_P(VecScaleTest, VectorScaling) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_vec_scale_test<float>(param);
+    }
+}
+
+std::vector<VecScaleParams> initialize_vec_scale_params() {
+    std::vector<std::vector<std::string>> rows =
+        load_csv(FIXTURE_PATH + "/matmul/vec_scale/metadata.csv");
+
+    std::vector<VecScaleParams> params;
+
+    for (const auto& row : rows) {
+        CUDANet::DType dtype = parse_dtype(row);
+
+        size_t size = std::stoul(row[1]);
+
+        params.push_back(
+            VecScaleParams{dtype, size, row[2], row[3], row[4], row[5]}
+        );
+    }
+
+    return params;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    VecScaleTestCases,
+    VecScaleTest,
+    testing::ValuesIn(initialize_vec_scale_params())
+);
