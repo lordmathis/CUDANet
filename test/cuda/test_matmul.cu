@@ -1026,3 +1026,78 @@ INSTANTIATE_TEST_SUITE_P(
     MaxReduceTest,
     testing::ValuesIn(initialize_max_reduce_params())
 );
+
+/*
+
+Sum Reduce
+
+*/
+
+struct SumReduceParams {
+    CUDANet::DType dtype;
+    const size_t   size;
+    std::string    vector_path;
+    std::string    expected_path;
+};
+
+class SumReduceTest : public ::testing::TestWithParam<SumReduceParams> {};
+
+template <typename T>
+void run_sum_reduce_test(const SumReduceParams params) {
+    auto vector_data   = load_binary<T>(params.vector_path);
+    auto expected_data = load_binary<T>(params.expected_path);
+
+    auto backend = create_backend();
+
+    auto vector_shape = CUDANet::Shape{params.size};
+    auto vector       = create_tensor<T>(
+        vector_shape, params.dtype, backend.get(), vector_data
+    );
+
+    size_t num_blocks      = calc_grid_size(params.size);
+    auto   expected_shape = CUDANet::Shape{num_blocks};
+    auto   expected       = create_tensor<T>(
+        expected_shape, params.dtype, backend.get(), expected_data
+    );
+    auto output =
+        create_output_tensor<T>(expected_shape, params.dtype, backend.get());
+
+    CUDANet::Kernels::sum_reduce<<<num_blocks, BLOCK_SIZE>>>(
+        static_cast<const T*>(vector.device_ptr()),
+        static_cast<T*>(output.device_ptr()), params.size
+    );
+
+    verify_output<T>(output, expected);
+}
+
+template void run_sum_reduce_test<float>(const SumReduceParams params);
+
+TEST_P(SumReduceTest, SummationReduction) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_sum_reduce_test<float>(param);
+    }
+}
+
+std::vector<SumReduceParams> initialize_sum_reduce_params() {
+    std::vector<std::vector<std::string>> rows =
+        load_csv(FIXTURE_PATH + "/matmul/sum_reduce/metadata.csv");
+
+    std::vector<SumReduceParams> params;
+
+    for (const auto& row : rows) {
+        CUDANet::DType dtype = parse_dtype(row);
+
+        size_t size = std::stoul(row[1]);
+
+        params.push_back(SumReduceParams{dtype, size, row[2], row[3]});
+    }
+
+    return params;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    SumReduceTestCases,
+    SumReduceTest,
+    testing::ValuesIn(initialize_sum_reduce_params())
+);
