@@ -1,68 +1,13 @@
 #include "cudanet.hpp"
 #include "gtest/gtest.h"
 #include "test_utils.hpp"
-
-inline auto create_backend() {
-    return CUDANet::BackendFactory::create(
-        CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig()
-    );
-}
-
-template <typename T>
-inline CUDANet::Tensor create_tensor(
-    const CUDANet::Shape& shape,
-    CUDANet::DType        dtype,
-    CUDANet::Backend*     backend,
-    const std::vector<T>& data
-) {
-    auto tensor = CUDANet::Tensor(shape, dtype, backend);
-    tensor.set_data(static_cast<void*>(const_cast<T*>(data.data())));
-    return tensor;
-}
-
-template <typename T>
-inline CUDANet::Tensor create_output_tensor(
-    const CUDANet::Shape& shape,
-    CUDANet::DType        dtype,
-    CUDANet::Backend*     backend
-) {
-    auto tensor = CUDANet::Tensor(shape, dtype, backend);
-    tensor.zero();
-    return tensor;
-}
-
-inline size_t calc_grid_size(size_t size) {
-    return (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
-}
-
-inline CUDANet::DType parse_dtype(const std::vector<std::string>& row) {
-    if (row[0] == "float32") return CUDANet::DType::FLOAT32;
-    throw std::runtime_error("Unknown dtype: " + row[0]);
-}
-
-template <typename T>
-inline void verify_output(CUDANet::Tensor& output, CUDANet::Tensor& expected) {
-    cudaDeviceSynchronize();
-    auto h_output   = output.to_host<T>();
-    auto h_expected = expected.to_host<T>();
-    ASSERT_EQ(h_output.size(), h_expected.size());
-    assert_elements_near(h_output, h_expected);
-}
+#include "cuda_test_utils.hpp"
 
 /*
 
 Mat Vec Mul
 
 */
-
-struct MatVecMulParams {
-    CUDANet::DType dtype;
-    const size_t   rows;
-    const size_t   cols;
-    std::string    matrix_path;
-    std::string    vector_path;
-    std::string    expected_path;
-};
 
 class MatVecMulTest : public ::testing::TestWithParam<MatVecMulParams> {};
 
@@ -112,30 +57,10 @@ TEST_P(MatVecMulTest, MatrixVectorMultiplication) {
     }
 }
 
-std::vector<MatVecMulParams> initialize_mat_vec_mul_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/mat_vec_mul/metadata.csv");
-
-    std::vector<MatVecMulParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t rows = std::stoul(row[1]);
-        size_t cols = std::stoul(row[2]);
-
-        params.push_back(
-            MatVecMulParams{dtype, rows, cols, row[3], row[4], row[5]}
-        );
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     MatVecMulTestCases,
     MatVecMulTest,
-    testing::ValuesIn(initialize_mat_vec_mul_params())
+    testing::ValuesIn(initialize_mat_vec_mul_params("/matmul/mat_vec_mul/metadata.csv"))
 );
 
 /*
@@ -144,20 +69,12 @@ Vec Vec Add
 
 */
 
-struct VecVecAddParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vec_a_path;
-    std::string    vec_b_path;
-    std::string    expected_path;
-};
-
-class VecVecAddTest : public ::testing::TestWithParam<VecVecAddParams> {};
+class VecVecAddTest : public ::testing::TestWithParam<BinaryOpParams> {};
 
 template <typename T>
-void run_vec_vec_add_test(const VecVecAddParams params) {
-    auto vector_a_data = load_binary<T>(params.vec_a_path);
-    auto vector_b_data = load_binary<T>(params.vec_b_path);
+void run_vec_vec_add_test(const BinaryOpParams params) {
+    auto vector_a_data = load_binary<T>(params.path_a);
+    auto vector_b_data = load_binary<T>(params.path_b);
     auto expected_data = load_binary<T>(params.expected_path);
 
     auto backend = create_backend();
@@ -187,7 +104,7 @@ void run_vec_vec_add_test(const VecVecAddParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_vec_vec_add_test<float>(const VecVecAddParams params);
+template void run_vec_vec_add_test<float>(const BinaryOpParams params);
 
 TEST_P(VecVecAddTest, VectorVectorAddition) {
     auto param = GetParam();
@@ -196,27 +113,10 @@ TEST_P(VecVecAddTest, VectorVectorAddition) {
     }
 }
 
-std::vector<VecVecAddParams> initialize_vec_vec_add_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_vec_add/metadata.csv");
-
-    std::vector<VecVecAddParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(VecVecAddParams{dtype, size, row[2], row[3], row[4]});
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecVecAddTestCases,
     VecVecAddTest,
-    testing::ValuesIn(initialize_vec_vec_add_params())
+    testing::ValuesIn(initialize_binary_params("/matmul/vec_vec_add/metadata.csv"))
 );
 
 /*
@@ -225,20 +125,12 @@ Vec Vec Sub
 
 */
 
-struct VecVecSubParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vec_a_path;
-    std::string    vec_b_path;
-    std::string    expected_path;
-};
-
-class VecVecSubTest : public ::testing::TestWithParam<VecVecSubParams> {};
+class VecVecSubTest : public ::testing::TestWithParam<BinaryOpParams> {};
 
 template <typename T>
-void run_vec_vec_sub_test(const VecVecSubParams params) {
-    auto vector_a_data = load_binary<T>(params.vec_a_path);
-    auto vector_b_data = load_binary<T>(params.vec_b_path);
+void run_vec_vec_sub_test(const BinaryOpParams params) {
+    auto vector_a_data = load_binary<T>(params.path_a);
+    auto vector_b_data = load_binary<T>(params.path_b);
     auto expected_data = load_binary<T>(params.expected_path);
 
     auto backend = create_backend();
@@ -268,7 +160,7 @@ void run_vec_vec_sub_test(const VecVecSubParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_vec_vec_sub_test<float>(const VecVecSubParams params);
+template void run_vec_vec_sub_test<float>(const BinaryOpParams params);
 
 TEST_P(VecVecSubTest, VectorVectorSubtraction) {
     auto param = GetParam();
@@ -277,27 +169,10 @@ TEST_P(VecVecSubTest, VectorVectorSubtraction) {
     }
 }
 
-std::vector<VecVecSubParams> initialize_vec_vec_sub_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_vec_sub/metadata.csv");
-
-    std::vector<VecVecSubParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(VecVecSubParams{dtype, size, row[2], row[3], row[4]});
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecVecSubTestCases,
     VecVecSubTest,
-    testing::ValuesIn(initialize_vec_vec_sub_params())
+    testing::ValuesIn(initialize_binary_params("/matmul/vec_vec_sub/metadata.csv"))
 );
 
 /*
@@ -306,20 +181,12 @@ Vec Vec Mul
 
 */
 
-struct VecVecMulParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vec_a_path;
-    std::string    vec_b_path;
-    std::string    expected_path;
-};
-
-class VecVecMulTest : public ::testing::TestWithParam<VecVecMulParams> {};
+class VecVecMulTest : public ::testing::TestWithParam<BinaryOpParams> {};
 
 template <typename T>
-void run_vec_vec_mul_test(const VecVecMulParams params) {
-    auto vector_a_data = load_binary<T>(params.vec_a_path);
-    auto vector_b_data = load_binary<T>(params.vec_b_path);
+void run_vec_vec_mul_test(const BinaryOpParams params) {
+    auto vector_a_data = load_binary<T>(params.path_a);
+    auto vector_b_data = load_binary<T>(params.path_b);
     auto expected_data = load_binary<T>(params.expected_path);
 
     auto backend = create_backend();
@@ -349,7 +216,7 @@ void run_vec_vec_mul_test(const VecVecMulParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_vec_vec_mul_test<float>(const VecVecMulParams params);
+template void run_vec_vec_mul_test<float>(const BinaryOpParams params);
 
 TEST_P(VecVecMulTest, VectorVectorMultiplication) {
     auto param = GetParam();
@@ -358,27 +225,10 @@ TEST_P(VecVecMulTest, VectorVectorMultiplication) {
     }
 }
 
-std::vector<VecVecMulParams> initialize_vec_vec_mul_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_vec_mul/metadata.csv");
-
-    std::vector<VecVecMulParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(VecVecMulParams{dtype, size, row[2], row[3], row[4]});
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecVecMulTestCases,
     VecVecMulTest,
-    testing::ValuesIn(initialize_vec_vec_mul_params())
+    testing::ValuesIn(initialize_binary_params("/matmul/vec_vec_mul/metadata.csv"))
 );
 
 /*
@@ -387,20 +237,12 @@ Vec Scalar Sub
 
 */
 
-struct VecScalarSubParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vector_path;
-    std::string    scalar_path;
-    std::string    expected_path;
-};
-
-class VecScalarSubTest : public ::testing::TestWithParam<VecScalarSubParams> {};
+class VecScalarSubTest : public ::testing::TestWithParam<BinaryOpParams> {};
 
 template <typename T>
-void run_vec_scalar_sub_test(const VecScalarSubParams params) {
-    auto vector_data   = load_binary<T>(params.vector_path);
-    auto scalar_data   = load_binary<T>(params.scalar_path);
+void run_vec_scalar_sub_test(const BinaryOpParams params) {
+    auto vector_data   = load_binary<T>(params.path_a);
+    auto scalar_data   = load_binary<T>(params.path_b);
     auto expected_data = load_binary<T>(params.expected_path);
 
     auto backend = create_backend();
@@ -430,7 +272,7 @@ void run_vec_scalar_sub_test(const VecScalarSubParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_vec_scalar_sub_test<float>(const VecScalarSubParams params);
+template void run_vec_scalar_sub_test<float>(const BinaryOpParams params);
 
 TEST_P(VecScalarSubTest, VectorScalarSubtraction) {
     auto param = GetParam();
@@ -439,29 +281,10 @@ TEST_P(VecScalarSubTest, VectorScalarSubtraction) {
     }
 }
 
-std::vector<VecScalarSubParams> initialize_vec_scalar_sub_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_scalar_sub/metadata.csv");
-
-    std::vector<VecScalarSubParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(
-            VecScalarSubParams{dtype, size, row[2], row[3], row[4]}
-        );
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecScalarSubTestCases,
     VecScalarSubTest,
-    testing::ValuesIn(initialize_vec_scalar_sub_params())
+    testing::ValuesIn(initialize_binary_params("/matmul/vec_scalar_sub/metadata.csv"))
 );
 
 /*
@@ -470,20 +293,12 @@ Vec Scalar Add
 
 */
 
-struct VecScalarAddParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vector_path;
-    std::string    scalar_path;
-    std::string    expected_path;
-};
-
-class VecScalarAddTest : public ::testing::TestWithParam<VecScalarAddParams> {};
+class VecScalarAddTest : public ::testing::TestWithParam<BinaryOpParams> {};
 
 template <typename T>
-void run_vec_scalar_add_test(const VecScalarAddParams params) {
-    auto vector_data   = load_binary<T>(params.vector_path);
-    auto scalar_data   = load_binary<T>(params.scalar_path);
+void run_vec_scalar_add_test(const BinaryOpParams params) {
+    auto vector_data   = load_binary<T>(params.path_a);
+    auto scalar_data   = load_binary<T>(params.path_b);
     auto expected_data = load_binary<T>(params.expected_path);
 
     auto backend = create_backend();
@@ -513,7 +328,7 @@ void run_vec_scalar_add_test(const VecScalarAddParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_vec_scalar_add_test<float>(const VecScalarAddParams params);
+template void run_vec_scalar_add_test<float>(const BinaryOpParams params);
 
 TEST_P(VecScalarAddTest, VectorScalarAddition) {
     auto param = GetParam();
@@ -522,29 +337,10 @@ TEST_P(VecScalarAddTest, VectorScalarAddition) {
     }
 }
 
-std::vector<VecScalarAddParams> initialize_vec_scalar_add_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_scalar_add/metadata.csv");
-
-    std::vector<VecScalarAddParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(
-            VecScalarAddParams{dtype, size, row[2], row[3], row[4]}
-        );
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecScalarAddTestCases,
     VecScalarAddTest,
-    testing::ValuesIn(initialize_vec_scalar_add_params())
+    testing::ValuesIn(initialize_binary_params("/matmul/vec_scalar_add/metadata.csv"))
 );
 
 /*
@@ -553,20 +349,12 @@ Vec Scalar Div
 
 */
 
-struct VecScalarDivParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vector_path;
-    std::string    scalar_path;
-    std::string    expected_path;
-};
-
-class VecScalarDivTest : public ::testing::TestWithParam<VecScalarDivParams> {};
+class VecScalarDivTest : public ::testing::TestWithParam<BinaryOpParams> {};
 
 template <typename T>
-void run_vec_scalar_div_test(const VecScalarDivParams params) {
-    auto vector_data   = load_binary<T>(params.vector_path);
-    auto scalar_data   = load_binary<T>(params.scalar_path);
+void run_vec_scalar_div_test(const BinaryOpParams params) {
+    auto vector_data   = load_binary<T>(params.path_a);
+    auto scalar_data   = load_binary<T>(params.path_b);
     auto expected_data = load_binary<T>(params.expected_path);
 
     auto backend = create_backend();
@@ -596,7 +384,7 @@ void run_vec_scalar_div_test(const VecScalarDivParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_vec_scalar_div_test<float>(const VecScalarDivParams params);
+template void run_vec_scalar_div_test<float>(const BinaryOpParams params);
 
 TEST_P(VecScalarDivTest, VectorScalarDivision) {
     auto param = GetParam();
@@ -605,51 +393,24 @@ TEST_P(VecScalarDivTest, VectorScalarDivision) {
     }
 }
 
-std::vector<VecScalarDivParams> initialize_vec_scalar_div_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_scalar_div/metadata.csv");
-
-    std::vector<VecScalarDivParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(
-            VecScalarDivParams{dtype, size, row[2], row[3], row[4]}
-        );
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecScalarDivTestCases,
     VecScalarDivTest,
-    testing::ValuesIn(initialize_vec_scalar_div_params())
+    testing::ValuesIn(initialize_binary_params("/matmul/vec_scalar_div/metadata.csv"))
 );
 
 /*
 
-Vec Scalar Div
+Vec Scalar Mul
 
 */
 
-struct VecScalarMulParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vector_path;
-    std::string    scalar_path;
-    std::string    expected_path;
-};
-
-class VecScalarMulTest : public ::testing::TestWithParam<VecScalarMulParams> {};
+class VecScalarMulTest : public ::testing::TestWithParam<BinaryOpParams> {};
 
 template <typename T>
-void run_vec_scalar_mul_test(const VecScalarMulParams params) {
-    auto vector_data   = load_binary<T>(params.vector_path);
-    auto scalar_data   = load_binary<T>(params.scalar_path);
+void run_vec_scalar_mul_test(const BinaryOpParams params) {
+    auto vector_data   = load_binary<T>(params.path_a);
+    auto scalar_data   = load_binary<T>(params.path_b);
     auto expected_data = load_binary<T>(params.expected_path);
 
     auto backend = create_backend();
@@ -679,7 +440,7 @@ void run_vec_scalar_mul_test(const VecScalarMulParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_vec_scalar_mul_test<float>(const VecScalarMulParams params);
+template void run_vec_scalar_mul_test<float>(const BinaryOpParams params);
 
 TEST_P(VecScalarMulTest, VectorScalarMultiplication) {
     auto param = GetParam();
@@ -688,29 +449,10 @@ TEST_P(VecScalarMulTest, VectorScalarMultiplication) {
     }
 }
 
-std::vector<VecScalarMulParams> initialize_vec_scalar_mul_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_scalar_mul/metadata.csv");
-
-    std::vector<VecScalarMulParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(
-            VecScalarMulParams{dtype, size, row[2], row[3], row[4]}
-        );
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecScalarMulTestCases,
     VecScalarMulTest,
-    testing::ValuesIn(initialize_vec_scalar_mul_params())
+    testing::ValuesIn(initialize_binary_params("/matmul/vec_scalar_mul/metadata.csv"))
 );
 
 /*
@@ -719,17 +461,10 @@ Vec Exp
 
 */
 
-struct VecExpParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vector_path;
-    std::string    expected_path;
-};
-
-class VecExpTest : public ::testing::TestWithParam<VecExpParams> {};
+class VecExpTest : public ::testing::TestWithParam<UnaryOpParams> {};
 
 template <typename T>
-void run_vec_exp_test(const VecExpParams params) {
+void run_vec_exp_test(const UnaryOpParams params) {
     auto vector_data   = load_binary<T>(params.vector_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
@@ -756,7 +491,7 @@ void run_vec_exp_test(const VecExpParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_vec_exp_test<float>(const VecExpParams params);
+template void run_vec_exp_test<float>(const UnaryOpParams params);
 
 TEST_P(VecExpTest, VectorExponentiation) {
     auto param = GetParam();
@@ -765,27 +500,10 @@ TEST_P(VecExpTest, VectorExponentiation) {
     }
 }
 
-std::vector<VecExpParams> initialize_vec_exp_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_exp/metadata.csv");
-
-    std::vector<VecExpParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(VecExpParams{dtype, size, row[2], row[3]});
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecExpTestCases,
     VecExpTest,
-    testing::ValuesIn(initialize_vec_exp_params())
+    testing::ValuesIn(initialize_unary_params<UnaryOpParams>("/matmul/vec_exp/metadata.csv"))
 );
 
 /*
@@ -794,17 +512,10 @@ Vec Sqrt
 
 */
 
-struct VecSqrtParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vector_path;
-    std::string    expected_path;
-};
-
-class VecSqrtTest : public ::testing::TestWithParam<VecSqrtParams> {};
+class VecSqrtTest : public ::testing::TestWithParam<UnaryOpParams> {};
 
 template <typename T>
-void run_vec_sqrt_test(const VecSqrtParams params) {
+void run_vec_sqrt_test(const UnaryOpParams params) {
     auto vector_data   = load_binary<T>(params.vector_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
@@ -831,7 +542,7 @@ void run_vec_sqrt_test(const VecSqrtParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_vec_sqrt_test<float>(const VecSqrtParams params);
+template void run_vec_sqrt_test<float>(const UnaryOpParams params);
 
 TEST_P(VecSqrtTest, VectorSquareRoot) {
     auto param = GetParam();
@@ -840,27 +551,10 @@ TEST_P(VecSqrtTest, VectorSquareRoot) {
     }
 }
 
-std::vector<VecSqrtParams> initialize_vec_sqrt_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_sqrt/metadata.csv");
-
-    std::vector<VecSqrtParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(VecSqrtParams{dtype, size, row[2], row[3]});
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecSqrtTestCases,
     VecSqrtTest,
-    testing::ValuesIn(initialize_vec_sqrt_params())
+    testing::ValuesIn(initialize_unary_params<UnaryOpParams>("/matmul/vec_sqrt/metadata.csv"))
 );
 
 /*
@@ -868,15 +562,6 @@ INSTANTIATE_TEST_SUITE_P(
 Vec Scale
 
 */
-
-struct VecScaleParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vector_path;
-    std::string    scale_path;
-    std::string    epsilon_path;
-    std::string    expected_path;
-};
 
 class VecScaleTest : public ::testing::TestWithParam<VecScaleParams> {};
 
@@ -927,29 +612,10 @@ TEST_P(VecScaleTest, VectorScaling) {
     }
 }
 
-std::vector<VecScaleParams> initialize_vec_scale_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/vec_scale/metadata.csv");
-
-    std::vector<VecScaleParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(
-            VecScaleParams{dtype, size, row[2], row[3], row[4], row[5]}
-        );
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     VecScaleTestCases,
     VecScaleTest,
-    testing::ValuesIn(initialize_vec_scale_params())
+    testing::ValuesIn(initialize_vec_scale_params("/matmul/vec_scale/metadata.csv"))
 );
 
 /*
@@ -958,17 +624,10 @@ Max Reduce
 
 */
 
-struct MaxReduceParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vector_path;
-    std::string    expected_path;
-};
-
-class MaxReduceTest : public ::testing::TestWithParam<MaxReduceParams> {};
+class MaxReduceTest : public ::testing::TestWithParam<UnaryOpParams> {};
 
 template <typename T>
-void run_max_reduce_test(const MaxReduceParams params) {
+void run_max_reduce_test(const UnaryOpParams params) {
     auto vector_data   = load_binary<T>(params.vector_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
@@ -995,7 +654,7 @@ void run_max_reduce_test(const MaxReduceParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_max_reduce_test<float>(const MaxReduceParams params);
+template void run_max_reduce_test<float>(const UnaryOpParams params);
 
 TEST_P(MaxReduceTest, MaximumReduction) {
     auto param = GetParam();
@@ -1004,27 +663,10 @@ TEST_P(MaxReduceTest, MaximumReduction) {
     }
 }
 
-std::vector<MaxReduceParams> initialize_max_reduce_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/max_reduce/metadata.csv");
-
-    std::vector<MaxReduceParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(MaxReduceParams{dtype, size, row[2], row[3]});
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     MaxReduceTestCases,
     MaxReduceTest,
-    testing::ValuesIn(initialize_max_reduce_params())
+    testing::ValuesIn(initialize_unary_params<UnaryOpParams>("/matmul/max_reduce/metadata.csv"))
 );
 
 /*
@@ -1033,17 +675,10 @@ Sum Reduce
 
 */
 
-struct SumReduceParams {
-    CUDANet::DType dtype;
-    const size_t   size;
-    std::string    vector_path;
-    std::string    expected_path;
-};
-
-class SumReduceTest : public ::testing::TestWithParam<SumReduceParams> {};
+class SumReduceTest : public ::testing::TestWithParam<UnaryOpParams> {};
 
 template <typename T>
-void run_sum_reduce_test(const SumReduceParams params) {
+void run_sum_reduce_test(const UnaryOpParams params) {
     auto vector_data   = load_binary<T>(params.vector_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
@@ -1070,7 +705,7 @@ void run_sum_reduce_test(const SumReduceParams params) {
     verify_output<T>(output, expected);
 }
 
-template void run_sum_reduce_test<float>(const SumReduceParams params);
+template void run_sum_reduce_test<float>(const UnaryOpParams params);
 
 TEST_P(SumReduceTest, SummationReduction) {
     auto param = GetParam();
@@ -1079,25 +714,8 @@ TEST_P(SumReduceTest, SummationReduction) {
     }
 }
 
-std::vector<SumReduceParams> initialize_sum_reduce_params() {
-    std::vector<std::vector<std::string>> rows =
-        load_csv(FIXTURE_PATH + "/matmul/sum_reduce/metadata.csv");
-
-    std::vector<SumReduceParams> params;
-
-    for (const auto& row : rows) {
-        CUDANet::DType dtype = parse_dtype(row);
-
-        size_t size = std::stoul(row[1]);
-
-        params.push_back(SumReduceParams{dtype, size, row[2], row[3]});
-    }
-
-    return params;
-}
-
 INSTANTIATE_TEST_SUITE_P(
     SumReduceTestCases,
     SumReduceTest,
-    testing::ValuesIn(initialize_sum_reduce_params())
+    testing::ValuesIn(initialize_unary_params<UnaryOpParams>("/matmul/sum_reduce/metadata.csv"))
 );
