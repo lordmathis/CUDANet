@@ -42,6 +42,9 @@ class MatMulGenerator(BaseGenerator):
         self._generate_vec_op(
             self.fixtures_path / "vec_exp", [5, 512, 1024], torch.exp
         )
+        self._generate_vec_op(
+            self.fixtures_path / "vec_sqrt", [5, 512, 1024], torch.sqrt
+        )
 
     def _generate_mat_vec_mul(self, save_path):
         os.makedirs(save_path, exist_ok=True)
