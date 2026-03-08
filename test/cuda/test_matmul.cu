@@ -546,3 +546,86 @@ INSTANTIATE_TEST_SUITE_P(
     VecScalarAddTest,
     testing::ValuesIn(initialize_vec_scalar_add_params())
 );
+
+/*
+
+Vec Scalar Div
+
+*/
+
+struct VecScalarDivParams {
+    CUDANet::DType dtype;
+    const size_t   size;
+    std::string    vector_path;
+    std::string    scalar_path;
+    std::string    expected_path;
+};
+
+class VecScalarDivTest : public ::testing::TestWithParam<VecScalarDivParams> {};
+
+template <typename T>
+void run_vec_scalar_div_test(const VecScalarDivParams params) {
+    auto vector_data   = load_binary<T>(params.vector_path);
+    auto scalar_data   = load_binary<T>(params.scalar_path);
+    auto expected_data = load_binary<T>(params.expected_path);
+
+    auto backend = create_backend();
+
+    auto vector_shape = CUDANet::Shape{params.size};
+
+    auto vector = create_tensor<T>(
+        vector_shape, params.dtype, backend.get(), vector_data
+    );
+    auto scalar = create_tensor<T>(
+        CUDANet::Shape{1}, params.dtype, backend.get(), scalar_data
+    );
+    auto expected = create_tensor<T>(
+        vector_shape, params.dtype, backend.get(), expected_data
+    );
+    auto output =
+        create_output_tensor<T>(vector_shape, params.dtype, backend.get());
+
+    auto grid_size = calc_grid_size(params.size);
+
+    CUDANet::Kernels::vec_scalar_div<<<grid_size, BLOCK_SIZE>>>(
+        static_cast<const T*>(vector.device_ptr()),
+        static_cast<T*>(output.device_ptr()),
+        static_cast<const T*>(scalar.device_ptr()), params.size
+    );
+
+    verify_output<T>(output, expected);
+}
+
+template void run_vec_scalar_div_test<float>(const VecScalarDivParams params);
+
+TEST_P(VecScalarDivTest, VectorScalarDivision) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_vec_scalar_div_test<float>(param);
+    }
+}
+
+std::vector<VecScalarDivParams> initialize_vec_scalar_div_params() {
+    std::vector<std::vector<std::string>> rows =
+        load_csv(FIXTURE_PATH + "/matmul/vec_scalar_div/metadata.csv");
+
+    std::vector<VecScalarDivParams> params;
+
+    for (const auto& row : rows) {
+        CUDANet::DType dtype = parse_dtype(row);
+
+        size_t size = std::stoul(row[1]);
+
+        params.push_back(
+            VecScalarDivParams{dtype, size, row[2], row[3], row[4]}
+        );
+    }
+
+    return params;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    VecScalarDivTestCases,
+    VecScalarDivTest,
+    testing::ValuesIn(initialize_vec_scalar_div_params())
+);
