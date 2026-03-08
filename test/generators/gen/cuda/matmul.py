@@ -15,7 +15,7 @@ class MatMulGenerator(BaseGenerator):
 
         # vector vector ops tests
         self._generate_vec_vec_op(
-            self.fixtures_path / "vec_vec_add", [5, 256, 512], torch.add
+            self.fixtures_path / "vec_vec_add", [5, 512, 1024], torch.add
         )
         self._generate_vec_vec_op(
             self.fixtures_path / "vec_vec_sub", [5, 512, 1024], torch.sub
@@ -27,6 +27,9 @@ class MatMulGenerator(BaseGenerator):
         # vector scalar ops tests
         self._generate_vec_scalar_op(
             self.fixtures_path / "vec_scalar_sub", [5, 512, 1024], torch.sub
+        )
+        self._generate_vec_scalar_op(
+            self.fixtures_path / "vec_scalar_add", [5, 512, 1024], torch.add
         )
 
     def _generate_mat_vec_mul(self, save_path):
