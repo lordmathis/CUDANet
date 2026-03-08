@@ -5,6 +5,7 @@ import os
 import torch
 
 from gen.cuda.matmul import MatMulGenerator
+from gen.cuda.activation import ActivationGenerator
 
 
 def clean(fixtures_path: str) -> None:
@@ -14,9 +15,7 @@ def clean(fixtures_path: str) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="CUDANet test fixture generator"
-    )
+    parser = argparse.ArgumentParser(description="CUDANet test fixture generator")
     parser.add_argument(
         "--clean", action="store_true", help="Remove fixtures directory and exit"
     )
@@ -43,6 +42,10 @@ def main() -> None:
         MatMulGenerator(
             seed=args.seed,
             fixtures_path=os.path.join(fixtures_path, "matmul"),
+        ),
+        ActivationGenerator(
+            seed=args.seed,
+            fixtures_path=os.path.join(fixtures_path, "activation"),
         ),
     ]
 
