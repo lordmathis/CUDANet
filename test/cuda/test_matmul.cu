@@ -750,8 +750,7 @@ void run_vec_exp_test(const VecExpParams params) {
 
     CUDANet::Kernels::vec_exp<<<grid_size, BLOCK_SIZE>>>(
         static_cast<const T*>(vector.device_ptr()),
-        static_cast<T*>(output.device_ptr()),
-        params.size
+        static_cast<T*>(output.device_ptr()), params.size
     );
 
     verify_output<T>(output, expected);
@@ -777,9 +776,7 @@ std::vector<VecExpParams> initialize_vec_exp_params() {
 
         size_t size = std::stoul(row[1]);
 
-        params.push_back(
-            VecExpParams{dtype, size, row[2], row[3]}
-        );
+        params.push_back(VecExpParams{dtype, size, row[2], row[3]});
     }
 
     return params;
@@ -828,8 +825,7 @@ void run_vec_sqrt_test(const VecSqrtParams params) {
 
     CUDANet::Kernels::vec_sqrt<<<grid_size, BLOCK_SIZE>>>(
         static_cast<const T*>(vector.device_ptr()),
-        static_cast<T*>(output.device_ptr()),
-        params.size
+        static_cast<T*>(output.device_ptr()), params.size
     );
 
     verify_output<T>(output, expected);
@@ -855,9 +851,7 @@ std::vector<VecSqrtParams> initialize_vec_sqrt_params() {
 
         size_t size = std::stoul(row[1]);
 
-        params.push_back(
-            VecSqrtParams{dtype, size, row[2], row[3]}
-        );
+        params.push_back(VecSqrtParams{dtype, size, row[2], row[3]});
     }
 
     return params;
@@ -889,8 +883,8 @@ class VecScaleTest : public ::testing::TestWithParam<VecScaleParams> {};
 template <typename T>
 void run_vec_scale_test(const VecScaleParams params) {
     auto vector_data   = load_binary<T>(params.vector_path);
-    auto scale_data = load_binary<T>(params.scale_path);
-    auto epsilon_data   = load_binary<T>(params.epsilon_path);
+    auto scale_data    = load_binary<T>(params.scale_path);
+    auto epsilon_data  = load_binary<T>(params.epsilon_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
     auto backend = create_backend();
@@ -957,3 +951,9 @@ INSTANTIATE_TEST_SUITE_P(
     VecScaleTest,
     testing::ValuesIn(initialize_vec_scale_params())
 );
+
+/*
+
+Max Reduce
+
+*/
