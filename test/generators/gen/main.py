@@ -6,6 +6,7 @@ import torch
 
 from gen.cuda.matmul import MatMulGenerator
 from gen.cuda.activation import ActivationGenerator
+from gen.cuda.pool import PoolGenerator
 
 
 def clean(fixtures_path: str) -> None:
@@ -46,6 +47,10 @@ def main() -> None:
         ActivationGenerator(
             seed=args.seed,
             fixtures_path=os.path.join(fixtures_path, "activation"),
+        ),
+        PoolGenerator(
+            seed=args.seed,
+            fixtures_path=os.path.join(fixtures_path, "pool"),
         ),
     ]
 

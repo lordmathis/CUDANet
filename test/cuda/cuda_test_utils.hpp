@@ -142,3 +142,32 @@ inline std::vector<VecScaleParams> initialize_vec_scale_params(
     }
     return params;
 }
+
+struct PoolParams {
+    CUDANet::DType dtype;
+    size_t         inH, inW, inC;
+    size_t         outH, outW;
+    size_t         kH, kW;
+    size_t         sH, sW;
+    size_t         pH, pW;
+    std::string    input_path;
+    std::string    expected_path;
+};
+
+inline std::vector<PoolParams> initialize_pool_params(
+    const std::string& csv_relative_path
+) {
+    std::vector<std::vector<std::string>> rows =
+        load_csv(FIXTURE_PATH + csv_relative_path);
+    std::vector<PoolParams> params;
+    for (const auto& row : rows) {
+        params.push_back(
+            {parse_dtype(row), std::stoul(row[1]), std::stoul(row[2]),
+             std::stoul(row[3]), std::stoul(row[4]), std::stoul(row[5]),
+             std::stoul(row[6]), std::stoul(row[7]), std::stoul(row[8]),
+             std::stoul(row[9]), std::stoul(row[10]), std::stoul(row[11]),
+             row[12], row[13]}
+        );
+    }
+    return params;
+}

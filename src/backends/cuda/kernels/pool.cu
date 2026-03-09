@@ -31,7 +31,7 @@ __global__ void Kernels::max_pool(
         return;
     }
 
-    T max = static_cast<T>(0);
+    T max = -1e38f;
 
     for (int k = 0; k < pool_shape[0]; k++) {
         for (int l = 0; l < pool_shape[1]; l++) {
