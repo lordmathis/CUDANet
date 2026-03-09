@@ -1,11 +1,11 @@
 import argparse
-import shutil
 import os
+import shutil
 
 import torch
 
-from gen.cuda.matmul import MatMulGenerator
 from gen.cuda.activation import ActivationGenerator
+from gen.cuda.matmul import MatMulGenerator
 from gen.cuda.pool import PoolGenerator
 
 

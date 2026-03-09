@@ -1,4 +1,3 @@
-from pathlib import Path
 import os
 
 import torch
@@ -39,7 +38,9 @@ class MatMulGenerator(BaseGenerator):
         )
 
         # vector ops tests
-        self._generate_vec_op(self.fixtures_path / "vec_exp", [5, 128, 512, 1024], torch.exp)
+        self._generate_vec_op(
+            self.fixtures_path / "vec_exp", [5, 128, 512, 1024], torch.exp
+        )
         self._generate_vec_op(
             self.fixtures_path / "vec_sqrt", [5, 128, 512, 1024], torch.sqrt
         )
