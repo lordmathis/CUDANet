@@ -10,45 +10,8 @@ inline auto create_backend() {
     );
 }
 
-template <typename T>
-inline CUDANet::Tensor create_tensor(
-    const CUDANet::Shape& shape,
-    CUDANet::DType        dtype,
-    CUDANet::Backend*     backend,
-    const std::vector<T>& data
-) {
-    auto tensor = CUDANet::Tensor(shape, dtype, backend);
-    tensor.set_data(static_cast<void*>(const_cast<T*>(data.data())));
-    return tensor;
-}
-
-template <typename T>
-inline CUDANet::Tensor create_output_tensor(
-    const CUDANet::Shape& shape,
-    CUDANet::DType        dtype,
-    CUDANet::Backend*     backend
-) {
-    auto tensor = CUDANet::Tensor(shape, dtype, backend);
-    tensor.zero();
-    return tensor;
-}
-
 inline size_t calc_grid_size(size_t size) {
     return (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
-}
-
-inline CUDANet::DType parse_dtype(const std::vector<std::string>& row) {
-    if (row[0] == "float32") return CUDANet::DType::FLOAT32;
-    throw std::runtime_error("Unknown dtype: " + row[0]);
-}
-
-template <typename T>
-inline void verify_output(CUDANet::Tensor& output, CUDANet::Tensor& expected) {
-    cudaDeviceSynchronize();
-    auto h_output   = output.to_host<T>();
-    auto h_expected = expected.to_host<T>();
-    ASSERT_EQ(h_output.size(), h_expected.size());
-    assert_elements_near(h_output, h_expected);
 }
 
 struct UnaryOpParams {

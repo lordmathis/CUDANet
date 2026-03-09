@@ -7,8 +7,13 @@ if(USE_CUDA)
     )
 endif()
 
+file(GLOB TENSOR_SOURCES
+    tensor/*.cpp
+)
+
 add_executable(test_main 
     ${CUDA_SOURCES}
+    ${TENSOR_SOURCES}
     test_main.cpp
 )
 

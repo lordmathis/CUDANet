@@ -9,6 +9,8 @@ from gen.cuda.matmul import MatMulGenerator
 from gen.cuda.pool import PoolGenerator
 from gen.cuda.convolution import ConvolutionGenerator
 
+from gen.tensor.tensor import TensorOpsGenerator
+
 
 def clean(fixtures_path: str) -> None:
     if os.path.exists(fixtures_path):
@@ -57,6 +59,10 @@ def main() -> None:
             seed=args.seed,
             fixtures_path=os.path.join(fixtures_path, "convolution"),
         ),
+        TensorOpsGenerator(
+            seed=args.seed,
+            fixtures_path=os.path.join(fixtures_path, "tensor")
+        )
     ]
 
     for gen in generators:
