@@ -30,6 +30,12 @@ std::vector<TensorParams> initialize_tensor_params(
     }
 }
 
+/*
+
+Tensor Max
+
+*/
+
 class TensorMaxTest : public ::testing::TestWithParam<TensorParams> {};
 
 template <typename T>
@@ -79,4 +85,61 @@ INSTANTIATE_TEST_SUITE_P(
     TensorMaxTestCases,
     TensorMaxTest,
     testing::ValuesIn(initialize_tensor_params("/tensor/max/metadata.csv"))
+);
+
+/*
+
+Tensor Sum
+
+*/
+
+class TensorSumTest : public ::testing::TestWithParam<TensorParams> {};
+
+template <typename T>
+void run_tensor_sum_test(const TensorParams params) {
+    std::vector<std::unique_ptr<CUDANet::Backend>> backends;
+
+#ifdef USE_CUDA
+    backends.push_back(
+        CUDANet::BackendFactory::create(
+            CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig()
+        )
+    );
+#endif
+
+    auto vector_data   = load_binary<T>(params.vector_path);
+    auto expected_data = load_binary<T>(params.expected_path);
+
+    for (auto& backend : backends) {
+        auto vector = create_tensor<T>(
+            CUDANet::Shape{params.size}, params.dtype, backend.get(),
+            vector_data
+        );
+        auto expected = create_tensor<T>(
+            CUDANet::Shape{1}, params.dtype, backend.get(), expected_data
+        );
+
+        auto output = create_output_tensor<T>(
+            CUDANet::Shape{1}, params.dtype, backend.get()
+        );
+
+        backend->sum(vector, output);
+
+        verify_output<T>(output, expected);
+    }
+}
+
+template void run_tensor_sum_test<float>(const TensorParams params);
+
+TEST_P(TensorSumTest, TensorSum) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_tensor_sum_test<float>(param);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    TensorSumTestCases,
+    TensorSumTest,
+    testing::ValuesIn(initialize_tensor_params("/tensor/sum/metadata.csv"))
 );

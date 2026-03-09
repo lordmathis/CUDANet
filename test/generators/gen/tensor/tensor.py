@@ -13,6 +13,9 @@ class TensorOpsGenerator(BaseGenerator):
         self._generate_tensor_ops(
             self.fixtures_path / "max", [5, 128, 512, 1024], torch.max
         )
+        self._generate_tensor_ops(
+            self.fixtures_path / "sum", [5, 128, 512, 1024], torch.sum
+        )
 
     def _generate_tensor_ops(self, save_path, sizes, torch_op):
         os.makedirs(save_path, exist_ok=True)
