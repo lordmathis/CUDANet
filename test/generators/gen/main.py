@@ -1,6 +1,7 @@
 import argparse
-import os
 import shutil
+
+from pathlib import Path
 
 import torch
 
@@ -11,9 +12,11 @@ from gen.cuda.convolution import ConvolutionGenerator
 
 from gen.tensor.tensor import TensorOpsGenerator
 
+from gen.layers.dense import DenseLayerGenerator
 
-def clean(fixtures_path: str) -> None:
-    if os.path.exists(fixtures_path):
+
+def clean(fixtures_path: Path) -> None:
+    if fixtures_path.exists():
         shutil.rmtree(fixtures_path)
         print(f"Removed {fixtures_path}")
 
@@ -28,13 +31,13 @@ def main() -> None:
     )
     parser.add_argument(
         "--fixtures_path",
-        default=os.path.join(os.path.dirname(__file__), "../../fixtures"),
+        default=str(Path(__file__).parent / "../../fixtures"),
         help="Root directory for generated fixtures",
     )
     args = parser.parse_args()
 
-    fixtures_path = os.path.abspath(args.fixtures_path)
-    os.makedirs(fixtures_path, exist_ok=True)
+    fixtures_path = Path(args.fixtures_path).resolve()
+    fixtures_path.mkdir(parents=True, exist_ok=True)
 
     if args.clean:
         clean(fixtures_path)
@@ -44,18 +47,15 @@ def main() -> None:
     dtypes = ["float32"]
 
     generators = [
-        MatMulGenerator(
-            fixtures_path=os.path.join(fixtures_path, "matmul"), dtypes=dtypes
-        ),
-        ActivationGenerator(
-            fixtures_path=os.path.join(fixtures_path, "activation"), dtypes=dtypes
-        ),
-        PoolGenerator(fixtures_path=os.path.join(fixtures_path, "pool"), dtypes=dtypes),
+        MatMulGenerator(fixtures_path=fixtures_path / "matmul", dtypes=dtypes),
+        ActivationGenerator(fixtures_path=fixtures_path / "activation", dtypes=dtypes),
+        PoolGenerator(fixtures_path=fixtures_path / "pool", dtypes=dtypes),
         ConvolutionGenerator(
-            fixtures_path=os.path.join(fixtures_path, "convolution"), dtypes=dtypes
+            fixtures_path=fixtures_path / "convolution", dtypes=dtypes
         ),
-        TensorOpsGenerator(
-            fixtures_path=os.path.join(fixtures_path, "tensor"), dtypes=dtypes
+        TensorOpsGenerator(fixtures_path=fixtures_path / "tensor", dtypes=dtypes),
+        DenseLayerGenerator(
+            fixtures_path=fixtures_path / "layers" / "dense", dtypes=dtypes
         ),
     ]
 

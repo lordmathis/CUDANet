@@ -41,6 +41,8 @@ docs
 
 __pycache__
 
+.ruff_cache
+
 # Model weights
 *.bin
 
