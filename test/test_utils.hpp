@@ -21,6 +21,20 @@
 
 const std::string FIXTURE_PATH = "fixtures";
 
+inline std::vector<std::unique_ptr<CUDANet::Backend>> get_backends() {
+    std::vector<std::unique_ptr<CUDANet::Backend>> backends;
+
+#ifdef USE_CUDA
+    backends.push_back(
+        CUDANet::BackendFactory::create(
+            CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig()
+        )
+    );
+#endif
+
+    return backends;
+}
+
 inline std::vector<std::vector<std::string>> load_csv(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open())

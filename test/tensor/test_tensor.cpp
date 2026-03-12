@@ -40,15 +40,7 @@ class TensorMaxTest : public ::testing::TestWithParam<TensorParams> {};
 
 template <typename T>
 void run_tensor_max_test(const TensorParams params) {
-    std::vector<std::unique_ptr<CUDANet::Backend>> backends;
-
-#ifdef USE_CUDA
-    backends.push_back(
-        CUDANet::BackendFactory::create(
-            CUDANet::BackendType::CUDA_BACKEND, CUDANet::BackendConfig()
-        )
-    );
-#endif
+    auto backends = get_backends();
 
     auto vector_data   = load_binary<T>(params.vector_path);
     auto expected_data = load_binary<T>(params.expected_path);

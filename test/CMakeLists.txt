@@ -11,9 +11,14 @@ file(GLOB TENSOR_SOURCES
     tensor/*.cpp
 )
 
+file(GLOB LAYER_SOURCES
+    layers/*.cpp
+)
+
 add_executable(test_main 
     ${CUDA_SOURCES}
     ${TENSOR_SOURCES}
+    ${LAYER_SOURCES}
     test_main.cpp
 )
 
