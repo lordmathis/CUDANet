@@ -2,18 +2,6 @@
 #include "gtest/gtest.h"
 #include "test_utils.hpp"
 
-#include <iostream>
-
-struct DenseParams {
-    CUDANet::DType dtype;
-    size_t         input_size;
-    size_t         output_size;
-    std::string    weights_path;
-    std::string    biases_path;
-    std::string    input_path;
-};
-
-
 TEST(TestDenseLayer, HandlesCorrectShape) {
     auto backends = get_backends();
     for (auto& backend : backends) {
@@ -42,3 +30,79 @@ TEST(TestDenseLayer, HandlesCorrectShape) {
         EXPECT_EQ(dense.get_biases_size(), dtype_size * out_size);
     }
 }
+
+TEST(TestDenseLayer, ThrowsExceptionsForIncorrectShapes) {
+    auto backends = get_backends();
+    for (auto& backend : backends) {
+        EXPECT_THROW(
+            (CUDANet::Layers::Dense{
+                CUDANet::Shape{1,1},
+                CUDANet::Shape{1},
+                backend.get()
+            }),
+            CUDANet::InvalidShapeException
+        );
+        EXPECT_THROW(
+            (CUDANet::Layers::Dense{
+                CUDANet::Shape{1},
+                CUDANet::Shape{1, 1},
+                backend.get()
+            }),
+            CUDANet::InvalidShapeException
+        );
+    }
+}
+
+struct DenseParams {
+    CUDANet::DType dtype;
+    size_t         input_size;
+    size_t         output_size;
+    std::string    weights_path;
+    std::string    biases_path;
+    std::string    input_path;
+};
+
+std::vector<DenseParams> initialize_dense_params(
+    const std::string& csv_relative_path
+) {
+    try {
+        std::vector<std::vector<std::string>> rows =
+            load_csv(FIXTURE_PATH + csv_relative_path);
+        std::vector<DenseParams> params;
+        for (const auto& row : rows) {
+            params.push_back({
+                parse_dtype(row),
+                std::stoul(row[1]),
+                std::stoul(row[2]),
+                row[3],
+                row[4],
+                row[5]
+            });
+        }
+        return params;
+    } catch (const std::exception& e) {
+        return {};
+    }
+}
+
+class DenseForwardTest : public ::testing::TestWithParam<DenseParams> {};
+
+template <typename T>
+void run_dense_forward_test(const DenseParams params) {
+    //
+}
+
+template void run_dense_forward_test<float>(const DenseParams params);
+
+TEST_P(DenseForwardTest, LayerForward) {
+    auto param = GetParam();
+    if (param.dtype == CUDANet::DType::FLOAT32) {
+        run_dense_forward_test<float>(param);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    DenseForwardTestCases,
+    DenseForwardTest,
+    testing::ValuesIn(initialize_dense_params("/layers/dense/metadata.csv"))
+);
