@@ -45,30 +45,18 @@ def main() -> None:
 
     generators = [
         MatMulGenerator(
-            seed=args.seed,
-            fixtures_path=os.path.join(fixtures_path, "matmul"),
-            dtypes=dtypes
+            fixtures_path=os.path.join(fixtures_path, "matmul"), dtypes=dtypes
         ),
         ActivationGenerator(
-            seed=args.seed,
-            fixtures_path=os.path.join(fixtures_path, "activation"),
-            dtypes=dtypes
+            fixtures_path=os.path.join(fixtures_path, "activation"), dtypes=dtypes
         ),
-        PoolGenerator(
-            seed=args.seed,
-            fixtures_path=os.path.join(fixtures_path, "pool"),
-            dtypes=dtypes
-        ),
+        PoolGenerator(fixtures_path=os.path.join(fixtures_path, "pool"), dtypes=dtypes),
         ConvolutionGenerator(
-            seed=args.seed,
-            fixtures_path=os.path.join(fixtures_path, "convolution"),
-            dtypes=dtypes
+            fixtures_path=os.path.join(fixtures_path, "convolution"), dtypes=dtypes
         ),
         TensorOpsGenerator(
-            seed=args.seed,
-            fixtures_path=os.path.join(fixtures_path, "tensor"),
-            dtypes=dtypes
-        )
+            fixtures_path=os.path.join(fixtures_path, "tensor"), dtypes=dtypes
+        ),
     ]
 
     for gen in generators:

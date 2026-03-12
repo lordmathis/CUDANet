@@ -14,11 +14,9 @@ _TORCH_TO_NUMPY: dict[torch.dtype, np.dtype] = {
 
 
 class BaseGenerator(ABC):
-    def __init__(self, seed, fixtures_path, dtypes):
+    def __init__(self, fixtures_path, dtypes):
         self.fixtures_path = Path(fixtures_path)
         self.dtypes = dtypes
-
-        torch.manual_seed(seed)
 
     @abstractmethod
     def generate(self): ...

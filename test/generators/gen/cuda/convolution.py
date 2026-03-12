@@ -7,8 +7,8 @@ from gen.base_generator import BaseGenerator
 
 
 class ConvolutionGenerator(BaseGenerator):
-    def __init__(self, seed, fixtures_path, dtypes):
-        super().__init__(seed, fixtures_path, dtypes)
+    def __init__(self, fixtures_path, dtypes):
+        super().__init__(fixtures_path, dtypes)
 
     def generate(self):
         os.makedirs(self.fixtures_path, exist_ok=True)

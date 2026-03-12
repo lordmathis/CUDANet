@@ -6,8 +6,8 @@ from gen.base_generator import BaseGenerator
 
 
 class MatMulGenerator(BaseGenerator):
-    def __init__(self, seed, fixtures_path, dtypes):
-        super().__init__(seed, fixtures_path, dtypes)
+    def __init__(self, fixtures_path, dtypes):
+        super().__init__(fixtures_path, dtypes)
 
     def generate(self):
         self._generate_mat_vec_mul(self.fixtures_path / "mat_vec_mul")
