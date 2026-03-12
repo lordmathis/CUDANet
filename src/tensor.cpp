@@ -1,19 +1,18 @@
-#include <stdexcept>
-
 #include "tensor.hpp"
 
-using namespace CUDANet;
+#include <stdexcept>
+
+namespace CUDANet {
 
 size_t dtype_size(DType dtype) {
-    switch (dtype)
-    {
-    case DType::FLOAT32:
-        return 4;
-        break;
-    
-    default:
-        throw std::runtime_error("Unknown DType");
-        break;
+    switch (dtype) {
+        case DType::FLOAT32:
+            return 4;
+            break;
+
+        default:
+            throw std::runtime_error("Unknown DType");
+            break;
     }
 }
 
@@ -121,6 +120,8 @@ void Tensor::fill(int value) {
     backend->fill(*this, value);
 }
 
-void Tensor::set_data(void *data) {
+void Tensor::set_data(void* data) {
     backend->copy_to_device(*this, data, total_size);
 }
+
+}  // namespace CUDANet
