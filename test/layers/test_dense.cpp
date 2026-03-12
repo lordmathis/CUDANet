@@ -60,6 +60,7 @@ struct DenseParams {
     std::string    weights_path;
     std::string    biases_path;
     std::string    input_path;
+    std::string    expected_path;
 };
 
 std::vector<DenseParams> initialize_dense_params(
@@ -76,7 +77,8 @@ std::vector<DenseParams> initialize_dense_params(
                 std::stoul(row[2]),
                 row[3],
                 row[4],
-                row[5]
+                row[5],
+                row[6]
             });
         }
         return params;
