@@ -6,11 +6,9 @@
 #include "backend.hpp"
 #include "shape.hpp"
 
-namespace CUDANet
-{
+namespace CUDANet {
 
-enum class DType
-{
+enum class DType {
     FLOAT32,
     // FLOAT16,  // Not implemented yet
     // INT32,  // Not implemented yet
@@ -21,17 +19,15 @@ size_t dtype_size(DType dtype);
 // Forward declaration
 class Backend;
 
-class Tensor
-{
-public:
-
+class Tensor {
+  public:
     Tensor() = default;
     Tensor(Shape shape, CUDANet::Backend* backend);
     Tensor(Shape shape, DType dtype, CUDANet::Backend* backend);
 
     Tensor(Tensor&& other) noexcept;
     Tensor& operator=(Tensor&& other) noexcept;
-    Tensor(const Tensor&) = delete;
+    Tensor(const Tensor&)            = delete;
     Tensor& operator=(const Tensor&) = delete;
 
     ~Tensor();
@@ -48,7 +44,7 @@ public:
 
     void fill(int value);
 
-    void set_data(void *data);
+    void set_data(void* data);
 
     template <typename T>
     std::vector<T> to_host() {
@@ -57,15 +53,15 @@ public:
         return h_vec;
     }
 
-private:
-    Shape       shape;
-    DType       dtype;
+  private:
+    Shape shape{};
+    DType dtype = DType::FLOAT32;
 
-    size_t total_elms;
-    size_t total_size;
+    size_t total_elms = 0;
+    size_t total_size = 0;
 
-    CUDANet::Backend*   backend;
-    void*       d_ptr;
+    CUDANet::Backend* backend = nullptr;
+    void*             d_ptr   = nullptr;
 };
 
-} // namespace CUDANet
+}  // namespace CUDANet
