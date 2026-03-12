@@ -91,7 +91,38 @@ class DenseForwardTest : public ::testing::TestWithParam<DenseParams> {};
 
 template <typename T>
 void run_dense_forward_test(const DenseParams params) {
-    //
+    auto backends = get_backends();
+
+    auto weights_data   = load_binary<T>(params.weights_path);
+    auto bias_data = load_binary<T>(params.biases_path);
+    auto input_data = load_binary<T>(params.input_path);
+    auto expected_data = load_binary<T>(params.expected_path);
+
+    for (auto& backend : backends) {
+        auto input = create_tensor<T>(
+            CUDANet::Shape{params.input_size}, params.dtype, backend.get(),
+            input_data
+        );
+        auto expected = create_tensor<T>(
+            CUDANet::Shape{params.output_size}, params.dtype, backend.get(),
+            expected_data
+        );
+
+        auto in_shape = CUDANet::Shape{params.input_size};
+        auto out_shape = CUDANet::Shape{params.output_size};
+
+        auto dense = CUDANet::Layers::Dense{
+            in_shape,
+            out_shape,
+            backend.get()
+        };
+        dense.set_weights(static_cast<void*>(weights_data));
+        dense.set_biases(static_cast<void*>(bias_data));
+
+        auto output = dense.forward(input);
+
+        verify_output<T>(output, expected);
+    }
 }
 
 template void run_dense_forward_test<float>(const DenseParams params);
