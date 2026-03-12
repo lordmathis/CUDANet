@@ -6,8 +6,8 @@ from gen.base_generator import BaseGenerator
 
 
 class MatMulGenerator(BaseGenerator):
-    def __init__(self, seed, fixtures_path):
-        super().__init__(seed, fixtures_path)
+    def __init__(self, seed, fixtures_path, dtypes):
+        super().__init__(seed, fixtures_path, dtypes)
 
     def generate(self):
         self._generate_mat_vec_mul(self.fixtures_path / "mat_vec_mul")
@@ -61,7 +61,7 @@ class MatMulGenerator(BaseGenerator):
         i = 0
         metadata = []
         for rows, cols in [(10, 5), (128, 64), (512, 256), (1024, 512)]:
-            for dtype in ["float32"]:
+            for dtype in self.dtypes:
                 matrix = torch.randn(rows, cols)
                 matrix_save_path = save_path / f"{i}_matrix.bin"
                 self.save_tensor(matrix, matrix_save_path)
@@ -95,7 +95,7 @@ class MatMulGenerator(BaseGenerator):
         i = 0
         metadata = []
         for size in sizes:
-            for dtype in ["float32"]:
+            for dtype in self.dtypes:
                 vec_a = torch.rand(size)
                 vec_a_save_path = save_path / f"{i}_vector_a.bin"
                 self.save_tensor(vec_a, vec_a_save_path)
@@ -128,7 +128,7 @@ class MatMulGenerator(BaseGenerator):
         i = 0
         metadata = []
         for size in sizes:
-            for dtype in ["float32"]:
+            for dtype in self.dtypes:
                 vector = torch.rand(size)
                 vector_save_path = save_path / f"{i}_vector.bin"
                 self.save_tensor(vector, vector_save_path)
@@ -161,7 +161,7 @@ class MatMulGenerator(BaseGenerator):
         i = 0
         metadata = []
         for size in sizes:
-            for dtype in ["float32"]:
+            for dtype in self.dtypes:
                 vector = torch.rand(size)
                 vector_save_path = save_path / f"{i}_vector.bin"
                 self.save_tensor(vector, vector_save_path)
@@ -189,7 +189,7 @@ class MatMulGenerator(BaseGenerator):
         i = 0
         metadata = []
         for size in sizes:
-            for dtype in ["float32"]:
+            for dtype in self.dtypes:
                 vector = torch.rand(size)
                 vector_save_path = save_path / f"{i}_vector.bin"
                 self.save_tensor(vector, vector_save_path)
@@ -227,7 +227,7 @@ class MatMulGenerator(BaseGenerator):
         i = 0
         metadata = []
         for size in sizes:
-            for dtype in ["float32"]:
+            for dtype in self.dtypes:
                 vector = torch.randn(size)
                 vector_save_path = save_path / f"{i}_vector.bin"
                 self.save_tensor(vector, vector_save_path)
@@ -260,7 +260,7 @@ class MatMulGenerator(BaseGenerator):
         i = 0
         metadata = []
         for size in sizes:
-            for dtype in ["float32"]:
+            for dtype in self.dtypes:
                 vector = torch.randn(size)
                 vector_save_path = save_path / f"{i}_vector.bin"
                 self.save_tensor(vector, vector_save_path)

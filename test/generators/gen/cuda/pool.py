@@ -7,8 +7,8 @@ from gen.base_generator import BaseGenerator
 
 
 class PoolGenerator(BaseGenerator):
-    def __init__(self, seed, fixtures_path):
-        super().__init__(seed, fixtures_path)
+    def __init__(self, seed, fixtures_path, dtypes):
+        super().__init__(seed, fixtures_path, dtypes)
 
     def generate(self):
         self._generate_pool_test(self.fixtures_path / "max_pool", F.max_pool2d)
@@ -28,7 +28,7 @@ class PoolGenerator(BaseGenerator):
         ]
 
         for shape, kernel, stride, padding in test_cases:
-            for dtype in ["float32"]:
+            for dtype in self.dtypes:
                 C, H, W = shape
                 kH, kW = kernel
                 sH, sW = stride

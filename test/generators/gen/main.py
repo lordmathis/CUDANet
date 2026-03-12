@@ -41,27 +41,33 @@ def main() -> None:
         return
 
     torch.manual_seed(args.seed)
+    dtypes = ["float32"]
 
     generators = [
         MatMulGenerator(
             seed=args.seed,
             fixtures_path=os.path.join(fixtures_path, "matmul"),
+            dtypes=dtypes
         ),
         ActivationGenerator(
             seed=args.seed,
             fixtures_path=os.path.join(fixtures_path, "activation"),
+            dtypes=dtypes
         ),
         PoolGenerator(
             seed=args.seed,
             fixtures_path=os.path.join(fixtures_path, "pool"),
+            dtypes=dtypes
         ),
         ConvolutionGenerator(
             seed=args.seed,
             fixtures_path=os.path.join(fixtures_path, "convolution"),
+            dtypes=dtypes
         ),
         TensorOpsGenerator(
             seed=args.seed,
-            fixtures_path=os.path.join(fixtures_path, "tensor")
+            fixtures_path=os.path.join(fixtures_path, "tensor"),
+            dtypes=dtypes
         )
     ]
 

@@ -7,8 +7,8 @@ from gen.base_generator import BaseGenerator
 
 
 class ConvolutionGenerator(BaseGenerator):
-    def __init__(self, seed, fixtures_path):
-        super().__init__(seed, fixtures_path)
+    def __init__(self, seed, fixtures_path, dtypes):
+        super().__init__(seed, fixtures_path, dtypes)
 
     def generate(self):
         os.makedirs(self.fixtures_path, exist_ok=True)
@@ -25,7 +25,7 @@ class ConvolutionGenerator(BaseGenerator):
         ]
 
         for i_c, o_c, k, s, p, size in configs:
-            for dtype in ["float32"]:
+            for dtype in self.dtypes:
                 # PyTorch uses (N, C, H, W)
                 # Our kernel uses (C, H, W) for input and (Filters, H, W) for output
                 # But the shapes passed to kernel are [H, W, C]
