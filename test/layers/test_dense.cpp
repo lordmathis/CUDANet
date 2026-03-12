@@ -5,25 +5,21 @@
 TEST(TestDenseLayer, HandlesCorrectShape) {
     auto backends = get_backends();
     for (auto& backend : backends) {
-        size_t in_size = 256;
+        size_t in_size  = 256;
         size_t out_size = 128;
 
-        auto in_shape = CUDANet::Shape{in_size};
+        auto in_shape  = CUDANet::Shape{in_size};
         auto out_shape = CUDANet::Shape{out_size};
 
-        auto dense = CUDANet::Layers::Dense{
-            in_shape,
-            out_shape,
-            backend.get()
-        };
+        auto dense = CUDANet::Layers::Dense{in_shape, out_shape, backend.get()};
 
         EXPECT_EQ(dense.input_shape(), in_shape);
         EXPECT_EQ(dense.output_shape(), out_shape);
-        
+
         EXPECT_EQ(dense.input_size(), in_size);
         EXPECT_EQ(dense.output_size(), out_size);
 
-        auto dtype = backend.get()->get_default_dtype();
+        auto dtype      = backend.get()->get_default_dtype();
         auto dtype_size = CUDANet::dtype_size(dtype);
 
         EXPECT_EQ(dense.get_weights_size(), dtype_size * in_size * out_size);
@@ -36,10 +32,10 @@ TEST(TestDenseLayer, ThrowsExceptionsForIncorrectShapes) {
     for (auto& backend : backends) {
         EXPECT_THROW(
             (CUDANet::Layers::Dense{
-                CUDANet::Shape{1,1},
+                CUDANet::Shape{1, 1},
                 CUDANet::Shape{1},
                 backend.get()
-            }),
+        }),
             CUDANet::InvalidShapeException
         );
         EXPECT_THROW(
@@ -47,7 +43,7 @@ TEST(TestDenseLayer, ThrowsExceptionsForIncorrectShapes) {
                 CUDANet::Shape{1},
                 CUDANet::Shape{1, 1},
                 backend.get()
-            }),
+        }),
             CUDANet::InvalidShapeException
         );
     }
@@ -70,15 +66,10 @@ std::vector<DenseParams> initialize_dense_params(
         load_csv(FIXTURE_PATH + csv_relative_path);
     std::vector<DenseParams> params;
     for (const auto& row : rows) {
-        params.push_back({
-            parse_dtype(row),
-            std::stoul(row[1]),
-            std::stoul(row[2]),
-            row[3],
-            row[4],
-            row[5],
-            row[6]
-        });
+        params.push_back(
+            {parse_dtype(row), std::stoul(row[1]), std::stoul(row[2]),
+             row[3], row[4], row[5], row[6]}
+        );
     }
     if (params.empty()) {
         throw std::runtime_error(
@@ -94,9 +85,9 @@ template <typename T>
 void run_dense_forward_test(const DenseParams params) {
     auto backends = get_backends();
 
-    auto weights_data   = load_binary<T>(params.weights_path);
-    auto bias_data = load_binary<T>(params.biases_path);
-    auto input_data = load_binary<T>(params.input_path);
+    auto weights_data  = load_binary<T>(params.weights_path);
+    auto bias_data     = load_binary<T>(params.biases_path);
+    auto input_data    = load_binary<T>(params.input_path);
     auto expected_data = load_binary<T>(params.expected_path);
 
     for (auto& backend : backends) {
@@ -109,18 +100,14 @@ void run_dense_forward_test(const DenseParams params) {
             expected_data
         );
 
-        auto in_shape = CUDANet::Shape{params.input_size};
+        auto in_shape  = CUDANet::Shape{params.input_size};
         auto out_shape = CUDANet::Shape{params.output_size};
 
-        auto dense = CUDANet::Layers::Dense{
-            in_shape,
-            out_shape,
-            backend.get()
-        };
-        dense.set_weights(static_cast<void*>(weights_data));
-        dense.set_biases(static_cast<void*>(bias_data));
+        auto dense = CUDANet::Layers::Dense{in_shape, out_shape, backend.get()};
+        dense.set_weights(weights_data.data());
+        dense.set_biases(bias_data.data());
 
-        auto output = dense.forward(input);
+        auto& output = dense.forward(input);
 
         verify_output<T>(output, expected);
     }
