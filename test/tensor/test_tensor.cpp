@@ -15,19 +15,20 @@ struct TensorParams {
 std::vector<TensorParams> initialize_tensor_params(
     const std::string& csv_relative_path
 ) {
-    try {
-        std::vector<std::vector<std::string>> rows =
-            load_csv(FIXTURE_PATH + csv_relative_path);
-        std::vector<TensorParams> params;
-        for (const auto& row : rows) {
-            params.push_back(
-                {parse_dtype(row), std::stoul(row[1]), row[2], row[3]}
-            );
-        }
-        return params;
-    } catch (const std::exception& e) {
-        return {};
+    std::vector<std::vector<std::string>> rows =
+        load_csv(FIXTURE_PATH + csv_relative_path);
+    std::vector<TensorParams> params;
+    for (const auto& row : rows) {
+        params.push_back(
+            {parse_dtype(row), std::stoul(row[1]), row[2], row[3]}
+        );
     }
+    if (params.empty()) {
+        throw std::runtime_error(
+            "No test cases found in: " + FIXTURE_PATH + csv_relative_path
+        );
+    }
+    return params;
 }
 
 /*
@@ -70,6 +71,8 @@ TEST_P(TensorMaxTest, TensorMax) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_tensor_max_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -127,6 +130,8 @@ TEST_P(TensorSumTest, TensorSum) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_tensor_sum_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 

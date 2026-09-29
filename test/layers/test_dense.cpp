@@ -66,25 +66,26 @@ struct DenseParams {
 std::vector<DenseParams> initialize_dense_params(
     const std::string& csv_relative_path
 ) {
-    try {
-        std::vector<std::vector<std::string>> rows =
-            load_csv(FIXTURE_PATH + csv_relative_path);
-        std::vector<DenseParams> params;
-        for (const auto& row : rows) {
-            params.push_back({
-                parse_dtype(row),
-                std::stoul(row[1]),
-                std::stoul(row[2]),
-                row[3],
-                row[4],
-                row[5],
-                row[6]
-            });
-        }
-        return params;
-    } catch (const std::exception& e) {
-        return {};
+    std::vector<std::vector<std::string>> rows =
+        load_csv(FIXTURE_PATH + csv_relative_path);
+    std::vector<DenseParams> params;
+    for (const auto& row : rows) {
+        params.push_back({
+            parse_dtype(row),
+            std::stoul(row[1]),
+            std::stoul(row[2]),
+            row[3],
+            row[4],
+            row[5],
+            row[6]
+        });
     }
+    if (params.empty()) {
+        throw std::runtime_error(
+            "No test cases found in: " + FIXTURE_PATH + csv_relative_path
+        );
+    }
+    return params;
 }
 
 class DenseForwardTest : public ::testing::TestWithParam<DenseParams> {};
@@ -131,6 +132,8 @@ TEST_P(DenseForwardTest, LayerForward) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_dense_forward_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
