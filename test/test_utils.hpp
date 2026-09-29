@@ -32,6 +32,10 @@ inline std::vector<std::unique_ptr<CUDANet::Backend>> get_backends() {
     );
 #endif
 
+    if (backends.empty()) {
+        GTEST_SKIP() << "No backends available in this build";
+    }
+
     return backends;
 }
 
@@ -103,15 +107,34 @@ inline CUDANet::Tensor create_output_tensor(
 }
 
 template <typename T>
+using compare_as = std::conditional_t<std::is_same_v<T, double>, double, float>;
+
+template <typename T>
+inline constexpr compare_as<T> element_tolerance() {
+    if constexpr (std::is_same_v<T, double>) {
+        return 1e-6;
+    } else if constexpr (sizeof(T) == 2) {  // float16 / __half
+        return 1e-2f;
+    } else {
+        return 1e-4f;
+    }
+}
+
+template <typename T>
 inline void assert_elements_near(
     const std::vector<T>& actual,
     const std::vector<T>& expected
 ) {
+    const compare_as<T> tolerance = element_tolerance<T>();
     for (size_t i = 0; i < actual.size(); ++i) {
-        if constexpr (std::is_floating_point_v<T>) {
-            EXPECT_NEAR(actual[i], expected[i], 1e-4f);
-        } else {
+        if constexpr (std::is_integral_v<T>) {
             EXPECT_EQ(actual[i], expected[i]);
+        } else {
+            EXPECT_NEAR(
+                static_cast<compare_as<T>>(actual[i]),
+                static_cast<compare_as<T>>(expected[i]),
+                tolerance
+            );
         }
     }
 }
