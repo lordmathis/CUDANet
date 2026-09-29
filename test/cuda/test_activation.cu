@@ -39,6 +39,8 @@ TEST_P(SigmoidTest, SigmoidActivation) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_sigmoid_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -83,6 +85,8 @@ TEST_P(ReLUTest, ReLUActivation) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_relu_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 

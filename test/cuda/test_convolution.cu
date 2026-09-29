@@ -64,6 +64,8 @@ TEST_P(ConvolutionTest, ConvolutionForward) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_convolution_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 

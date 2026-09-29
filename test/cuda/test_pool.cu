@@ -44,6 +44,8 @@ TEST_P(MaxPoolTest, MaxPooling) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_max_pool_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -93,6 +95,8 @@ TEST_P(AvgPoolTest, AvgPooling) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_avg_pool_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 

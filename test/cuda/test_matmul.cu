@@ -54,6 +54,8 @@ TEST_P(MatVecMulTest, MatrixVectorMultiplication) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_mat_vec_mul_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -110,6 +112,8 @@ TEST_P(VecVecAddTest, VectorVectorAddition) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_vec_add_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -166,6 +170,8 @@ TEST_P(VecVecSubTest, VectorVectorSubtraction) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_vec_sub_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -222,6 +228,8 @@ TEST_P(VecVecMulTest, VectorVectorMultiplication) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_vec_mul_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -278,6 +286,8 @@ TEST_P(VecScalarSubTest, VectorScalarSubtraction) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_scalar_sub_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -334,6 +344,8 @@ TEST_P(VecScalarAddTest, VectorScalarAddition) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_scalar_add_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -390,6 +402,8 @@ TEST_P(VecScalarDivTest, VectorScalarDivision) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_scalar_div_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -446,6 +460,8 @@ TEST_P(VecScalarMulTest, VectorScalarMultiplication) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_scalar_mul_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -497,6 +513,8 @@ TEST_P(VecExpTest, VectorExponentiation) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_exp_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -548,6 +566,8 @@ TEST_P(VecSqrtTest, VectorSquareRoot) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_sqrt_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -609,6 +629,8 @@ TEST_P(VecScaleTest, VectorScaling) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_vec_scale_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -660,6 +682,8 @@ TEST_P(MaxReduceTest, MaximumReduction) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_max_reduce_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
@@ -711,6 +735,8 @@ TEST_P(SumReduceTest, SummationReduction) {
     auto param = GetParam();
     if (param.dtype == CUDANet::DType::FLOAT32) {
         run_sum_reduce_test<float>(param);
+    } else {
+        GTEST_SKIP() << "Unsupported dtype";
     }
 }
 
