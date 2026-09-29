@@ -38,11 +38,15 @@ class MatMulGenerator(BaseGenerator):
         )
 
         # vector ops tests
+        # sqrt requires non-negative input, so its generator clamps with abs
         self._generate_vec_op(
-            self.fixtures_path / "vec_exp", [5, 128, 512, 1024], torch.exp
+            self.fixtures_path / "vec_exp", [5, 128, 512, 1024], torch.exp, torch.randn
         )
         self._generate_vec_op(
-            self.fixtures_path / "vec_sqrt", [5, 128, 512, 1024], torch.sqrt
+            self.fixtures_path / "vec_sqrt",
+            [5, 128, 512, 1024],
+            torch.sqrt,
+            lambda size: torch.randn(size).abs(),
         )
         self._generate_vec_scale_tests(self.fixtures_path / "vec_scale", [5, 512, 1024])
         self._generate_max_reduce(
@@ -96,11 +100,11 @@ class MatMulGenerator(BaseGenerator):
         metadata = []
         for size in sizes:
             for dtype in self.dtypes:
-                vec_a = torch.rand(size)
+                vec_a = torch.randn(size)
                 vec_a_save_path = save_path / f"{i}_vector_a.bin"
                 self.save_tensor(vec_a, vec_a_save_path)
 
-                vec_b = torch.rand(size)
+                vec_b = torch.randn(size)
                 vec_b_save_path = save_path / f"{i}_vector_b.bin"
                 self.save_tensor(vec_b, vec_b_save_path)
 
@@ -129,11 +133,11 @@ class MatMulGenerator(BaseGenerator):
         metadata = []
         for size in sizes:
             for dtype in self.dtypes:
-                vector = torch.rand(size)
+                vector = torch.randn(size)
                 vector_save_path = save_path / f"{i}_vector.bin"
                 self.save_tensor(vector, vector_save_path)
 
-                scalar = torch.rand(1)
+                scalar = torch.randn(1)
                 scalar_save_path = save_path / f"{i}_scalar.bin"
                 self.save_tensor(scalar, scalar_save_path)
 
@@ -155,14 +159,14 @@ class MatMulGenerator(BaseGenerator):
 
         self.save_metadata(metadata, save_path / "metadata.csv")
 
-    def _generate_vec_op(self, save_path, sizes, torch_op):
+    def _generate_vec_op(self, save_path, sizes, torch_op, vec_factory):
         os.makedirs(save_path, exist_ok=True)
 
         i = 0
         metadata = []
         for size in sizes:
             for dtype in self.dtypes:
-                vector = torch.rand(size)
+                vector = vec_factory(size)
                 vector_save_path = save_path / f"{i}_vector.bin"
                 self.save_tensor(vector, vector_save_path)
 
@@ -190,11 +194,12 @@ class MatMulGenerator(BaseGenerator):
         metadata = []
         for size in sizes:
             for dtype in self.dtypes:
-                vector = torch.rand(size)
+                vector = torch.randn(size)
                 vector_save_path = save_path / f"{i}_vector.bin"
                 self.save_tensor(vector, vector_save_path)
 
-                scale = torch.rand(1)
+                # rsqrt requires a positive scale, so keep it non-negative
+                scale = torch.randn(1).abs()
                 scale_save_path = save_path / f"{i}_scale.bin"
                 self.save_tensor(scale, scale_save_path)
 

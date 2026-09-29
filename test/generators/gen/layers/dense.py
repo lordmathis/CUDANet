@@ -20,15 +20,15 @@ class DenseLayerGenerator(BaseGenerator):
             for dtype in self.dtypes:
                 torch_dtype = to_torch_dtype(dtype)
 
-                weights = torch.rand(size[1], size[0], dtype=torch_dtype)
+                weights = torch.randn(size[1], size[0], dtype=torch_dtype)
                 weights_save_path = self.fixtures_path / f"{i}_weights.bin"
                 self.save_tensor(weights, weights_save_path)
 
-                bias = torch.rand(size[1], dtype=torch_dtype)
+                bias = torch.randn(size[1], dtype=torch_dtype)
                 bias_save_path = self.fixtures_path / f"{i}_bias.bin"
                 self.save_tensor(bias, bias_save_path)
 
-                input = torch.rand(size[0], dtype=torch_dtype)
+                input = torch.randn(size[0], dtype=torch_dtype)
                 input_save_path = self.fixtures_path / f"{i}_input.bin"
                 self.save_tensor(input, input_save_path)
 
