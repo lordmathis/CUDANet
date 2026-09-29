@@ -12,6 +12,20 @@ _TORCH_TO_NUMPY: dict[torch.dtype, np.dtype] = {
     torch.int64: np.dtype("int64"),
 }
 
+_STR_TO_TORCH: dict[str, torch.dtype] = {
+    "float32": torch.float32,
+    "float16": torch.float16,
+    "int32": torch.int32,
+    "int64": torch.int64,
+}
+
+
+def to_torch_dtype(dtype: str) -> torch.dtype:
+    try:
+        return _STR_TO_TORCH[dtype]
+    except KeyError:
+        raise ValueError(f"Unknown dtype string: {dtype}") from None
+
 
 class BaseGenerator(ABC):
     def __init__(self, fixtures_path, dtypes):
