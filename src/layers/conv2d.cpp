@@ -38,11 +38,11 @@ Conv2d::Conv2d(
     }
 
     if (stride_shape.size() != 2) {
-        throw InvalidShapeException("stride", 3, stride_shape.size());
+        throw InvalidShapeException("stride", 2, stride_shape.size());
     }
 
     if (padding_shape.size() != 2) {
-        throw InvalidShapeException("padding", 3, padding_shape.size());
+        throw InvalidShapeException("padding", 2, padding_shape.size());
     }
 
     this->dtype = dtype;

@@ -13,6 +13,7 @@ from gen.cuda.convolution import ConvolutionGenerator
 from gen.tensor.tensor import TensorOpsGenerator
 
 from gen.layers.dense import DenseLayerGenerator
+from gen.layers.conv2d import Conv2dLayerGenerator
 
 
 def clean(fixtures_path: Path) -> None:
@@ -57,6 +58,10 @@ def main() -> None:
         DenseLayerGenerator(
             fixtures_path=fixtures_path / "layers" / "dense", dtypes=dtypes
         ),
+        Conv2dLayerGenerator(
+            fixtures_path=fixtures_path / "layers" / "conv2d", dtypes=dtypes
+        )
+
     ]
 
     for gen in generators:
