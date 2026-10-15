@@ -36,13 +36,13 @@ class BaseGenerator(ABC):
     def generate(self): ...
 
     @staticmethod
-    def save_tensor(tensor: torch.Tensor, path: str) -> None:
+    def save_tensor(tensor: torch.Tensor, path: str | Path) -> None:
         np_dtype = _TORCH_TO_NUMPY[tensor.dtype]
         tensor.detach().cpu().contiguous().numpy().astype(np_dtype, copy=False).tofile(
             path
         )
 
     @staticmethod
-    def save_metadata(metadata: list[list[str]], path: str) -> None:
+    def save_metadata(metadata: list[list[str]], path: str | Path) -> None:
         with open(path, "w", newline="") as f:
             csv.writer(f, lineterminator="\n").writerows(metadata)

@@ -11,10 +11,10 @@ class ActivationGenerator(BaseGenerator):
 
     def generate(self):
         self._generate_activation_test(
-            self.fixtures_path / "sigmoid", [5, 512, 1024], torch.sigmoid
+            self.fixtures_path / "sigmoid", [5, 129, 512, 1024], torch.sigmoid
         )
         self._generate_activation_test(
-            self.fixtures_path / "relu", [5, 512, 1024], torch.relu
+            self.fixtures_path / "relu", [5, 129, 512, 1024], torch.relu
         )
 
     def _generate_activation_test(self, save_path, sizes, torch_op):

@@ -21,7 +21,6 @@ bool CUDA::is_cuda_available() {
     int device_count;
     cudaError_t result = cudaGetDeviceCount(&device_count);
     
-    // Return false instead of crashing
     if (result != cudaSuccess || device_count == 0) {
         return false;
     }
