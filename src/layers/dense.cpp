@@ -49,11 +49,11 @@ CUDANet::Shape Dense::output_shape() {
 }
 
 size_t Dense::input_size() {
-    return in_shape[0];
+    return in_shape[0] * dtype_size(dtype);
 };
 
 size_t Dense::output_size() {
-    return out_shape[0];
+    return out_shape[0] * dtype_size(dtype); 
 };
 
 // TODO: Use dtype

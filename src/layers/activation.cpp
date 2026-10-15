@@ -67,11 +67,11 @@ CUDANet::Shape Activation::output_shape() {
 }
 
 size_t Activation::input_size() {
-    return shape[0];
+    return shape[0] * dtype_size(dtype);
 }
 
 size_t Activation::output_size() {
-    return shape[0];
+    return shape[0] * dtype_size(dtype);
 }
 
 void Activation::set_weights(void* input) {}

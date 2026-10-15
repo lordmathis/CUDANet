@@ -1,5 +1,9 @@
 #pragma once
 
+#include <array>
+#include <stdexcept>
+#include <string>
+
 #include "tensor.hpp"
 #include "backend.hpp"
 #include "layer.hpp"
@@ -15,6 +19,33 @@ namespace CUDANet::Layers {
  *
  */
 enum ActivationType { SIGMOID, RELU, SOFTMAX, NONE };
+
+/**
+ * @brief Array of all activation functions
+ * 
+ */
+constexpr std::array ALL_ACTIVATIONS = {
+    SIGMOID,
+    RELU,
+    SOFTMAX,
+    NONE,
+};
+
+inline ActivationType str2at(const std::string& activation_type) {
+    if (activation_type == "sigmoid") {
+        return SIGMOID;
+    }
+    if (activation_type == "relu") {
+        return RELU;
+    }
+    if (activation_type == "softmax") {
+        return SOFTMAX;
+    }
+    if (activation_type == "none") {
+        return NONE;
+    }
+    throw std::runtime_error("Unknown activation type: " + activation_type);
+}
 
 /**
  * @brief Utility class that performs activation

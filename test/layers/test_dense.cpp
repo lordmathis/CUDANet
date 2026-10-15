@@ -16,11 +16,11 @@ TEST(TestDenseLayer, HandlesCorrectShape) {
         EXPECT_EQ(dense.input_shape(), in_shape);
         EXPECT_EQ(dense.output_shape(), out_shape);
 
-        EXPECT_EQ(dense.input_size(), in_size);
-        EXPECT_EQ(dense.output_size(), out_size);
-
         auto dtype      = backend.get()->get_default_dtype();
         auto dtype_size = CUDANet::dtype_size(dtype);
+
+        EXPECT_EQ(dense.input_size(), in_size * dtype_size);
+        EXPECT_EQ(dense.output_size(), out_size * dtype_size);
 
         EXPECT_EQ(dense.get_weights_size(), dtype_size * in_size * out_size);
         EXPECT_EQ(dense.get_biases_size(), dtype_size * out_size);
