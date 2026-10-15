@@ -33,9 +33,9 @@ inline std::vector<std::unique_ptr<CUDANet::Backend>> get_backends() {
 #endif
 
     if (backends.empty()) {
-        GTEST_SKIP() << "No backends available in this build";
+        throw std::runtime_error("No backends available in this build");
     }
-
+    
     return backends;
 }
 
